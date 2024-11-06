@@ -20,7 +20,7 @@ the AI to generate outfit ideas and designs that reflect both innovation and rel
 | Name Surname           | Student Number | Github Account                                 |
 |------------------------|----------------|------------------------------------------------|
 | Hazal KANTAR           | 202111036      | [hazalkntr](https://github.com/hazalkntr)      |
-| Ahmet Doğukan GÜNDEMİR | 202111033      | [Jzerq](https://github.com/Jzerq)              |
+| Ahmet Doğukan GÜNDEMİR | 202111033      | [dogukangundemir](https://github.com/dogukangundemir)              |
 | Ali Boran BEKTAŞ       | 202111001      | [Boranbektas](https://github.com/Boranbektas)  |
 | Hikmet Berkin BULUT    | 202111057      | [bekX0](https://github.com/bekX0)              |
 
