@@ -1,18 +1,16 @@
 # Multimodal RAG-Based Product Recommendation System
-This project aims to develop an AI-based fashion design system that replicates the creative process of fashion designers. It integrates Multimodal
-Retrieval-Augmented Generation (RAG) systems and Large Language Models (LLMs) to generate personalized fashion designs using visual and
-textual data from fashion retailers. The system collects images of products, style references, and descriptions, processed into unified embeddings
-using models like CLIP. These embeddings are stored in a vector database for efficient retrieval, while generative models create outfit designs
-blending historical influences with modern trends. Users can interact with the system through natural language queries for design suggestions,
-with LLMs providing personalized recommendations.
+This project focuses on developing a Multimodal Retrieval-Augmented Generation (RAG) system for personalized recommendations in the
+fashion and cosmetics domains. The system integrates advanced AI techniques, including LLMs (Large Language Models) and multimodal
+embeddings, to suggest eco-friendly and trending products based on user preferences. By combining textual descriptions, product images,
+sustainability certifications, and trend data, the system creates a comprehensive, user-driven recommendation platform.
 
 <br>
 
-The system's architecture consists of a React frontend for interactive design refinement and a Flask backend for handling API requests and model
-management. The recommendation engine uses user profiles, different trends, and fashion data to tailor suggestions, ensuring that the outfit
-designs are commercially viable. This iterative process allows users to adjust designs in real-time, offering a seamless collaboration experience
-with AI. Incorporating fashion domain information, the system ensures that the designs meet industry standards, and cultural influences, allowing
-the AI to generate outfit ideas and designs that reflect both innovation and relevance.
+Key components of the project include a Flask-based backend for API management, a React frontend for user interaction, and a vector
+database to store multimodal embeddings efficiently. Leveraging technologies like OpenAI API, Gemini, and embedding services such as
+Hugging Face, the system enables real-time recommendations with enhanced accuracy and relevance. This platform aims to bridge the gap in
+sustainable fashion and cosmetics by offering environmentally conscious, trend-aware, and user-personalized suggestions through a user-friendly
+web interface.
 
 <br>
 
