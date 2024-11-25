@@ -1,4 +1,4 @@
-# AI-Driven Fashion Designer
+# Multimodal RAG-Based Product Recommendation System
 This project aims to develop an AI-based fashion design system that replicates the creative process of fashion designers. It integrates Multimodal
 Retrieval-Augmented Generation (RAG) systems and Large Language Models (LLMs) to generate personalized fashion designs using visual and
 textual data from fashion retailers. The system collects images of products, style references, and descriptions, processed into unified embeddings
