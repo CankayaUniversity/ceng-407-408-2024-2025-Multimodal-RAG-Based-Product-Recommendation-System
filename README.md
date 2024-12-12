@@ -22,7 +22,9 @@ web interface.
 | Ali Boran BEKTAŞ       | 202111001      | [Boranbektas](https://github.com/Boranbektas)  |
 | Hikmet Berkin BULUT    | 202111057      | [bekX0](https://github.com/bekX0)              |
 
-<br>
+<be>
+
+- ## [Project Website](https://multimodalrecomendation.wordpress.com/)
 
 ## Advisor
 - Dr. Serdar Arslan
