@@ -35,4 +35,3 @@ df["English Ingredients"] = df["English Ingredients"].apply(lambda ing_list: ", 
 output_file = "prodlist.xlsx"
 df.to_excel(output_file, index=False)
 
-
