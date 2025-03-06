@@ -1,0 +1,46 @@
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    border: none;
+    outline: none;
+  }
+  
+  .button:focus {
+    outline: 2px solid #2194f2;
+    outline-offset: 2px;
+  }
+  
+  .button-default {
+    background-color: #2194f2;
+    color: white;
+    padding: 8px 16px;
+  }
+  
+  .button-default:hover {
+    background-color: rgba(33, 148, 242, 0.9);
+  }
+  
+  .button-ghost {
+    background-color: transparent;
+    color: #121417;
+  }
+  
+  .button-ghost:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+  
+  .button-default {
+    padding: 8px 16px;
+  }
+  
+  .button-icon {
+    padding: 8px;
+    border-radius: 50%;
+  }
+  
+  

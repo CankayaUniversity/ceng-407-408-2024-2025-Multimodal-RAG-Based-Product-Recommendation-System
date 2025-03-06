@@ -1,0 +1,34 @@
+.avatar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    width: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: #e5e8eb;
+  }
+  
+  .avatar-image {
+    width: 100%;
+    height: 100%;
+  }
+  
+  .avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .avatar-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    font-weight: 500;
+    color: #121417;
+  }
+  
+  
