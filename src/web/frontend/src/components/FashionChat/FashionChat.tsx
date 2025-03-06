@@ -5,17 +5,22 @@ import Button from "../ui/Button";
 import Input from "../ui/Input";
 import SuggestionItem from "../SuggestionItem/SuggestionItem";
 import "./FashionChat.css";
+import { useNavigate } from "react-router-dom";
+import { Send } from "lucide-react";
 
 function FashionAIChat() {
   const [message, setMessage] = useState<string>("");
+  const navigate = useNavigate();
 
   return (
     <div className="fashion-chat-container">
       {/* Header */}
       <header className="fashion-chat-header">
-        <div className="fashion-chat-logo">
-          <div className="fashion-chat-logo-icon"></div>
-          Fashion AI
+        <div className="fashion-chat-logo" onClick={() => navigate("/")}>
+          <div className="fashion-chat-logo">
+            <div className="fashion-chat-logo-icon"></div>
+            Fashion AI
+          </div>
         </div>
         <div className="fashion-chat-search-container">
           <Search className="fashion-chat-search-icon" />
@@ -62,7 +67,7 @@ function FashionAIChat() {
             <Button variant="ghost" className="fashion-chat-attachment-button">
               <Paperclip className="fashion-chat-attachment-icon" />
             </Button>
-            <Button className="fashion-chat-send-button">Send</Button>
+            <Button className="fashion-chat-send-button">Send!</Button>
           </div>
         </div>
 
