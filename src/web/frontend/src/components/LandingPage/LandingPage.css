@@ -32,6 +32,13 @@
   }
   
   button {
+    display: flex;
+    justify-self: center;
     cursor: pointer;
+    width: 30%;
+
   }
   
+  .btn-primary{
+      text-align:center; 
+  }

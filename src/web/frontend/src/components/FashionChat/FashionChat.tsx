@@ -1,15 +1,13 @@
-"use client"
-
-import { useState } from "react"
-import { Search, Paperclip } from "lucide-react"
-import Avatar from "../ui/Avatar"
-import Button from "../ui/Button"
-import Input from "../ui/Input"
-import SuggestionItem from "../SuggestionItem/SuggestionItem"
-import "./FashionChat.css"
+import { useState } from "react";
+import { Search, Paperclip } from "lucide-react";
+import Avatar from "../ui/Avatar";
+import Button from "../ui/Button";
+import Input from "../ui/Input";
+import SuggestionItem from "../SuggestionItem/SuggestionItem";
+import "./FashionChat.css";
 
 function FashionAIChat() {
-  const [message, setMessage] = useState<string>("")
+  const [message, setMessage] = useState<string>("");
 
   return (
     <div className="fashion-chat-container">
@@ -27,7 +25,11 @@ function FashionAIChat() {
           <Button variant="ghost" className="fashion-chat-help-button">
             Help
           </Button>
-          <Avatar image="https://placeholder.svg?height=32&width=32" fallback="U" alt="User" />
+          <Avatar
+            image="https://placeholder.svg?height=32&width=32"
+            fallback="U"
+            alt="User"
+          />
         </div>
       </header>
 
@@ -41,7 +43,8 @@ function FashionAIChat() {
             <div className="fashion-chat-message-sender">AI</div>
             <div className="fashion-chat-message-bubble">
               <p className="fashion-chat-message-text">
-                Hello! I'm your personal shopping assistant. How can I help you today?
+                Hello! I'm your personal shopping assistant. How can I help you
+                today?
               </p>
             </div>
           </div>
@@ -77,14 +80,21 @@ function FashionAIChat() {
               subtitle="Men's fashion"
               image="https://placeholder.svg?height=48&width=48"
             />
-            <SuggestionItem title="Shoes" subtitle="Shoes" image="https://placeholder.svg?height=48&width=48" />
-            <SuggestionItem title="Bags" subtitle="Bags" image="https://placeholder.svg?height=48&width=48" />
+            <SuggestionItem
+              title="Shoes"
+              subtitle="Shoes"
+              image="https://placeholder.svg?height=48&width=48"
+            />
+            <SuggestionItem
+              title="Bags"
+              subtitle="Bags"
+              image="https://placeholder.svg?height=48&width=48"
+            />
           </div>
         </div>
       </main>
     </div>
-  )
+  );
 }
 
-export default FashionAIChat
-
+export default FashionAIChat;
