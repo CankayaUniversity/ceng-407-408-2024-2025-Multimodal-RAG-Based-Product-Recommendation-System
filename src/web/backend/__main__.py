@@ -6,8 +6,9 @@ CORS(app)
 
 @app.route("/test", methods=["POST"])
 def test():
-    body = request.data
-    return jsonify({"message": "Successfully executed."}), 200
+    user_message = request.json.get("message", "")
+    bot_response = f"Echo: {user_message}"  # Simple echo response
+    return jsonify({"response": bot_response})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3001)

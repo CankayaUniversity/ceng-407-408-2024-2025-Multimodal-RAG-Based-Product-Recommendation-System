@@ -6,11 +6,39 @@ import Input from "../ui/Input";
 import SuggestionItem from "../SuggestionItem/SuggestionItem";
 import "./FashionChat.css";
 import { useNavigate } from "react-router-dom";
+import { Message } from "../../types/message";
+import { sendMessageToBackend } from "../../api/ChatService";
 import { Send } from "lucide-react";
 
 function FashionAIChat() {
   const [message, setMessage] = useState<string>("");
+  const [messeages, setMesseages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
+
+  const handleMessage = async () => {
+    if (!message.trim()) return;
+
+    // Add user message to chat
+    const userMessage: Message = { text: message, sender: "user" };
+    setMesseages((prev) => [...prev, userMessage]);
+    setMessage("");
+    setLoading(true);
+
+    try {
+      //Send backend & recieve bot response
+      const botResponseText = await sendMessageToBackend(message);
+      const botMessage: Message = { text: botResponseText, sender: "bot" };
+      setMesseages((prev) => [...prev, botMessage]);
+    } catch (error) {
+      console.error("Error finding messeage:", error);
+      setMesseages((prev) => [
+        ...prev,
+        { text: "Error:Unable to reach server.", sender: "bot" },
+      ]);
+    }
+    setLoading(false);
+  };
 
   return (
     <div className="fashion-chat-container">
@@ -44,22 +72,21 @@ function FashionAIChat() {
 
         {/* Chat Messages */}
         <div className="fashion-chat-messages">
-          <div className="fashion-chat-message">
-            <div className="fashion-chat-message-sender">AI</div>
-            <div className="fashion-chat-message-bubble">
-              <p className="fashion-chat-message-text">
-                Hello! I'm your personal shopping assistant. How can I help you
-                today?
-              </p>
+          {messeages.map((msg, index) => (
+            <div key={index} className={`fashion-chat-message ${msg.sender}`}>
+              <div className="fashion-chat-message-bubble">
+                <p>{msg.text}</p>
+              </div>
             </div>
-          </div>
+          ))}
+          {loading && <p className="fashion-chat-loading">Thinking...</p>}
         </div>
 
         {/* Message Input */}
         <div className="fashion-chat-input-container">
           <Input
             className="fashion-chat-input"
-            placeholder="Search for a product..."
+            placeholder="Type a messeage..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
           />
@@ -67,7 +94,12 @@ function FashionAIChat() {
             <Button variant="ghost" className="fashion-chat-attachment-button">
               <Paperclip className="fashion-chat-attachment-icon" />
             </Button>
-            <Button className="fashion-chat-send-button">Send!</Button>
+            <Button
+              onClick={handleMessage}
+              disabled={loading}
+              className="fashion-chat-send-button">
+              Send!
+            </Button>
           </div>
         </div>
 
