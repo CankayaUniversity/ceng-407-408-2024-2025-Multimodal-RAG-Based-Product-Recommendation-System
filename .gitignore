@@ -28,3 +28,7 @@ dist-ssr
 
 *.pyc
 __pycache__
+
+datasets/
+
+.env

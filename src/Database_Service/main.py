@@ -49,17 +49,34 @@ def initialize_collection(client, df,base_collection_name, category):
 
 df_women = pd.read_csv("zara_women.csv")
 
-base_collection = "zara_women"
+df_men = pd.read_csv("datasets/zara_men.csv")
+
+base_collection_women = "zara_women"
+
+base_collection_men = "clip_men"
 
 
-target_categories = [
+target_categories_women = [
     "SPECIAL_PRICES", "WAISTCOATS_GILETS", "BASICS", "BLAZERS",
     "DRESSES_JUMPSUITS", "JACKETS", "KNITWEAR", "SHIRTS", "SHOES"
 ]
 
+target_categories_men = [
+    "BLAZERS", "HOODIES_SWEATSHIRTS", "LINEN", "OVERSHIRTS",
+    "POLO SHIRTS", "SHIRTS", "SHOES", "SHORTS", "SWEATERS_CARDIGANS",
+    "T-SHIRTS", "TROUSERS"
+]
+
 # insert women data
-for category in target_categories:
+for category in target_categories_women:
     df_of_category = df_women[df_women['category'] == category]
-    initialize_collection(client, df_of_category,base_collection_name=base_collection, category=category)
+    initialize_collection(client, df_of_category,base_collection_name=base_collection_women, category=category)
+    
+
+# insert men data
+for category in target_categories_men:
+    df_of_category = df_men[df_men['category'] == category]
+    initialize_collection(client, df_of_category,base_collection_name=base_collection_men, category=category)
+    
     
     
