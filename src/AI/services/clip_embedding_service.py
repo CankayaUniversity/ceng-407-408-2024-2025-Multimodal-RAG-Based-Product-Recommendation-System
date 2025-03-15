@@ -32,9 +32,9 @@ class ClipEmbeddingService(EmbeddingService):
                     vectors.append(vector)
                     valid_urls.append(url)
                 else:
-                    print(f"Failed to fetch image: {url}")
+                    logger.warning(f"Failed to fetch image: {url}")
             except Exception as e:
-                print(f"Error processing image {url}: {e}")
+                logger.error(f"Error processing image {url}: {e}")
 
         if vectors:
             return np.mean(vectors, axis=0), valid_urls  # average vector for multiple images

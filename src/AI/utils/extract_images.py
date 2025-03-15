@@ -1,4 +1,7 @@
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Function to extract all image URLs from the image data column
 def extract_all_images(image_data) -> list:
@@ -8,5 +11,5 @@ def extract_all_images(image_data) -> list:
         if isinstance(image_list, list) and len(image_list) > 0:
             return [list(item.keys())[0] for item in image_list]  # Extract all image URLs
     except Exception as e:
-        print(f"Error parsing image data: {e}")
+        logger.error(f"Error parsing image data: {e}")
     return None
