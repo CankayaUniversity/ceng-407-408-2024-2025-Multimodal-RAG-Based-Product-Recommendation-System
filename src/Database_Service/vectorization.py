@@ -32,4 +32,4 @@ def images_to_vectors(image_urls):
 
     if vectors:
         return np.mean(vectors, axis=0), valid_urls  # Average vector for multiple images
-    return None
+    return None , None
