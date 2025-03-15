@@ -1,7 +1,7 @@
 import json
 
 # Function to extract all image URLs from the image data column
-def extract_all_images(image_data):
+def extract_all_images(image_data) -> list:
     try:
         # Convert string to a list of dictionaries
         image_list = json.loads(image_data.replace("'", "\""))  # Fix single-quote issue for JSON parsing
