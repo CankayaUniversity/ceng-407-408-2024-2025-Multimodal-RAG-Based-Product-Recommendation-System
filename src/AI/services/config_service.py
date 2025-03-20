@@ -2,13 +2,14 @@ import logging
 import yaml
 from pathlib import Path
 from box import Box
+from lib.singleton import Singleton
 
 logger = logging.getLogger(__name__)
 base_root_path = Path(__file__).parent.parent.parent.parent
 ai_root_path = Path(__file__).parent.parent
 config_path = Path.joinpath(ai_root_path, "configs/config.yaml")
 
-class ConfigService:
+class ConfigService(metaclass=Singleton):
     def __init__(self):
         with open(config_path, 'r') as f:
             config = yaml.safe_load(f)
@@ -34,8 +35,3 @@ class ConfigService:
     @property
     def target_categories(self):
         return self._config.database_init.categories
-
-
-
-
-GeneralConfigService = ConfigService()
