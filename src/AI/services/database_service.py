@@ -1,6 +1,6 @@
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
-from services import GeneralConfigService
+from services import ConfigService
 from services.base_embedding_service import EmbeddingService
 import os
 from dotenv import load_dotenv
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 class DatabaseService:
     def __init__(self, embedding_service: EmbeddingService):
-        self.config_service = GeneralConfigService
+        self.config_service = ConfigService()
         self._init_client()
         self.embedding_service = embedding_service
 
