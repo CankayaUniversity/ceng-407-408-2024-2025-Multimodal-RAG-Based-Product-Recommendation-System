@@ -8,7 +8,7 @@ database_service = DatabaseService()
 
 @api_blueprint.route('/login', methods=['POST'])
 def login():
-    collection = database_service.get_collection(db_name=os.getenv("MONGO_DB_NAME"), collection_name="users")
+    collection = database_service.get_collection(collection_name="users")
     data = request.get_json()
     email = data.get('email')
     password = data.get('password')
