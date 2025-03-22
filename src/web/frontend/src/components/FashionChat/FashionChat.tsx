@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Search, Paperclip } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Search, Paperclip, Send } from "lucide-react";
 import Avatar from "../ui/Avatar";
 import Button from "../ui/Button";
 import Input from "../ui/Input";
@@ -8,33 +8,38 @@ import "./FashionChat.css";
 import { useNavigate } from "react-router-dom";
 import { Message } from "../../types/message";
 import { sendMessageToBackend } from "../../api/ChatService";
-import { Send } from "lucide-react";
 
 function FashionAIChat() {
-  const [message, setMessage] = useState<string>("");
-  const [messeages, setMesseages] = useState<Message[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
+
+  // Auto-scroll to the latest message
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const handleMessage = async () => {
     if (!message.trim()) return;
 
-    // Add user message to chat
     const userMessage: Message = { text: message, sender: "user" };
-    setMesseages((prev) => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setMessage("");
     setLoading(true);
 
     try {
-      //Send backend & recieve bot response
       const botResponseText = await sendMessageToBackend(message);
-      const botMessage: Message = { text: botResponseText, sender: "bot" };
-      setMesseages((prev) => [...prev, botMessage]);
-    } catch (error) {
-      console.error("Error finding messeage:", error);
-      setMesseages((prev) => [
+      setMessages((prev) => [
         ...prev,
-        { text: "Error:Unable to reach server.", sender: "bot" },
+        { text: botResponseText, sender: "bot" },
+      ]);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      setMessages((prev) => [
+        ...prev,
+        { text: "Error: Unable to reach server.", sender: "bot" },
       ]);
     }
     setLoading(false);
@@ -45,10 +50,8 @@ function FashionAIChat() {
       {/* Header */}
       <header className="fashion-chat-header">
         <div className="fashion-chat-logo" onClick={() => navigate("/")}>
-          <div className="fashion-chat-logo">
-            <div className="fashion-chat-logo-icon"></div>
-            Fashion AI
-          </div>
+          <div className="fashion-chat-logo-icon"></div>
+          Fashion AI
         </div>
         <div className="fashion-chat-search-container">
           <Search className="fashion-chat-search-icon" />
@@ -72,7 +75,7 @@ function FashionAIChat() {
 
         {/* Chat Messages */}
         <div className="fashion-chat-messages">
-          {messeages.map((msg, index) => (
+          {messages.map((msg, index) => (
             <div key={index} className={`fashion-chat-message ${msg.sender}`}>
               <div className="fashion-chat-message-bubble">
                 <p>{msg.text}</p>
@@ -80,13 +83,14 @@ function FashionAIChat() {
             </div>
           ))}
           {loading && <p className="fashion-chat-loading">Thinking...</p>}
+          <div ref={messagesEndRef} />
         </div>
 
         {/* Message Input */}
         <div className="fashion-chat-input-container">
           <Input
             className="fashion-chat-input"
-            placeholder="Type a messeage..."
+            placeholder="Type a message..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
           />
@@ -96,9 +100,9 @@ function FashionAIChat() {
             </Button>
             <Button
               onClick={handleMessage}
-              disabled={loading}
+              disabled={loading || !message.trim()}
               className="fashion-chat-send-button">
-              Send!
+              <Send size={20} className="fashion-chat-send-icon" />
             </Button>
           </div>
         </div>
@@ -107,26 +111,16 @@ function FashionAIChat() {
         <div className="fashion-chat-suggestions">
           <h2 className="fashion-chat-suggestions-title">Suggestions</h2>
           <div className="fashion-chat-suggestions-grid">
-            <SuggestionItem
-              title="Women's fashion"
-              subtitle="Women's fashion"
-              image="https://placeholder.svg?height=48&width=48"
-            />
-            <SuggestionItem
-              title="Men's fashion"
-              subtitle="Men's fashion"
-              image="https://placeholder.svg?height=48&width=48"
-            />
-            <SuggestionItem
-              title="Shoes"
-              subtitle="Shoes"
-              image="https://placeholder.svg?height=48&width=48"
-            />
-            <SuggestionItem
-              title="Bags"
-              subtitle="Bags"
-              image="https://placeholder.svg?height=48&width=48"
-            />
+            {["Women's fashion", "Men's fashion", "Shoes", "Bags"].map(
+              (category) => (
+                <SuggestionItem
+                  key={category}
+                  title={category}
+                  subtitle={category}
+                  image="https://placeholder.svg?height=48&width=48"
+                />
+              )
+            )}
           </div>
         </div>
       </main>
