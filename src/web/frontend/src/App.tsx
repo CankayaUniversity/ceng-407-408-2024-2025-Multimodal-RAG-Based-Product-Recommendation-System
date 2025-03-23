@@ -12,7 +12,7 @@ function App(): React.ReactElement {
         <Route path="/" element={<LandingPage />} />
         <Route path="/chat" element={<FashionAIChat />} />
         <Route path="/login" element={<Login />} />
-        <Route path="register" element={<Register />} />
+        <Route path="/register" element={<Register />} />
       </Routes>
     </Router>
   );
