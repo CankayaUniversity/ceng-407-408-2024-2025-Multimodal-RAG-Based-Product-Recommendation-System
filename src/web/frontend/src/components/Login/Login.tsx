@@ -31,7 +31,7 @@ const Login = () => {
 
       if (response.ok) {
         console.log("Login successful", data);
-        // Handle successful login (e.g., redirect or save token)
+        window.sessionStorage.setItem("token", data["token"]);
       } else {
         setError(data.error || "Login failed");
       }

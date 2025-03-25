@@ -1,8 +1,7 @@
 from flask import request, jsonify
-from pymongo import MongoClient
 from . import api_blueprint
 from services import DatabaseService
-import os
+from auth import create_token
 
 database_service = DatabaseService()
 
@@ -19,6 +18,7 @@ def login():
     user = collection.find_one({"email": email, "password": password})
     
     if user:
-        return jsonify({"message": "Login successful", "email": email}), 200
+        token = create_token(email=email)
+        return jsonify({"message": "Login successful", "email": email, "token":token }), 200
     else:
         return jsonify({"error": "Invalid credentials"}), 401
