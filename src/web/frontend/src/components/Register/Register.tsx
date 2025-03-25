@@ -11,14 +11,40 @@ import {
 import { LockOutlined } from "@mui/icons-material";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const Register = () => {
+  const navigate = useNavigate();
   const [userName, setuserName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleRegister = async () => {
-    //TO DO:Implement client side of register api
+    try {
+      const response = await fetch('http://localhost:3001/api/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: userName,
+          email: email,
+          password: password,
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        alert('Registration successful!');
+        navigate('/login');
+      } else {
+        alert(`Error: ${data.error || 'Registration failed'}`);
+      }
+    } catch (error) {
+      console.error('Error during registration:', error);
+      alert('Server error');
+    }
   };
 
   return (
@@ -46,7 +72,7 @@ const Register = () => {
                   id="name"
                   label="Name"
                   autoFocus
-                  value={name}
+                  value={userName}
                   onChange={(e) => setuserName(e.target.value)}
                 />
               </Grid>
