@@ -1,6 +1,7 @@
-export interface Message{
+// Assuming this is the definition of the Message type
+export interface Message {
     text?: string;
-    image_url?:string;
     sender: "user" | "bot";
-    
-}
+    imageBase64?: string; // Optional property for the image
+  }
+  

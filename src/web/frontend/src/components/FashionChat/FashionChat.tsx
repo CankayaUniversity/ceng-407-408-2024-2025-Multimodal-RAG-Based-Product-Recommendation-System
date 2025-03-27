@@ -13,35 +13,86 @@ function FashionAIChat() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const [image, setImage] = useState<string | undefined>(undefined);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
 
-  // Auto-scroll to the latest message
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleMessage = async () => {
-    if (!message.trim()) return;
 
-    const userMessage: Message = { text: message, sender: "user" };
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFilePreview(reader.result as string);
+        setImage(reader.result as string);
+      };
+      reader.readAsDataURL(selectedFile);
+    }
+  };
+
+  const handleMessage = async () => {
+    if (!message.trim() && !image) return;
+
+
+    const userMessage: Message = { text: message, sender: "user", imageBase64: image };
     setMessages((prev) => [...prev, userMessage]);
     setMessage("");
     setLoading(true);
 
     try {
-      const botResponseText = await sendMessageToBackend(message);
-      setMessages((prev) => [
-        ...prev,
-        { text: botResponseText, sender: "bot" },
-      ]);
+      if (message.trim()) {
+        const botResponseText = await sendMessageToBackend(message);
+        setMessages((prev) => [
+          ...prev,
+          { text: botResponseText, sender: "bot", imageBase64: undefined }, // No image for the bot response
+        ]);
+      }
+
+      if (image) {
+        const imageData = { imageBase64: image };
+
+        const fileResponse = await fetch("http://localhost:3001/upload", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(imageData),
+        });
+
+        const fileData = await fileResponse.json();
+        if (fileData.success) {
+          setMessages((prev) => [
+            ...prev,
+            { text: "Image uploaded successfully!", sender: "bot", imageBase64: image },
+          ]);
+        } else {
+          setMessages((prev) => [
+            ...prev,
+            { text: "Error: Image upload failed.", sender: "bot", imageBase64: undefined },
+          ]);
+        }
+      }
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error("Error communicating with backend:", error);
       setMessages((prev) => [
         ...prev,
-        { text: "Error: Unable to reach server.", sender: "bot" },
+        { text: "Error: Unable to reach the server.", sender: "bot", imageBase64: undefined },
       ]);
     }
+
+    setImage(undefined);
+    setFilePreview(null);
+    setFile(null);
     setLoading(false);
   };
 
@@ -50,6 +101,10 @@ function FashionAIChat() {
     if (e.key === "Enter") {
       handleMessage();
     }
+  };
+
+  const handleAttachmentClick = () => {
+    fileInputRef.current?.click();
   };
 
   return (
@@ -86,6 +141,13 @@ function FashionAIChat() {
             <div key={index} className={`fashion-chat-message ${msg.sender}`}>
               <div className="fashion-chat-message-bubble">
                 <p>{msg.text}</p>
+                {msg.imageBase64 && (
+                  <img
+                    src={msg.imageBase64}
+                    alt="Uploaded"
+                    className="fashion-chat-image"
+                  />
+                )}
               </div>
             </div>
           ))}
@@ -100,18 +162,26 @@ function FashionAIChat() {
             placeholder="Type a message..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            onKeyPress={handleKeyPress} // Allow sending with Enter key
+            onKeyPress={handleKeyPress}
           />
+          {/* Display the image preview */}
+          {filePreview && (
+            <div className="fashion-chat-image-preview">
+              <img src={filePreview} alt="Preview" className="fashion-chat-preview-image" />
+            </div>
+          )}
           <div className="fashion-chat-input-actions">
-            <Button className="fashion-chat-attachment-button">
+            <Button
+              onClick={handleAttachmentClick}
+              className="fashion-chat-attachment-button">
               <Paperclip size={20} className="fashion-chat-attachment-icon" />
             </Button>
             <Button
               onClick={handleMessage}
-              disabled={loading || !message.trim()}
+              disabled={loading || (!message.trim() && !image)}
               className="fashion-chat-send-button">
               <Send
-                size={20}
+                size={25}
                 color="white"
                 className="fashion-chat-send-icon"
               />
@@ -136,6 +206,15 @@ function FashionAIChat() {
           </div>
         </div>
       </main>
+
+      {/* Hidden File Input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        style={{ display: "none" }}
+      />
     </div>
   );
 }
