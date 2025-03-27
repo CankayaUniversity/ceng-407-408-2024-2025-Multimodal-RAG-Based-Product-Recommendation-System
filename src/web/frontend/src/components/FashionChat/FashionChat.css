@@ -165,31 +165,9 @@
     display: flex;
     align-items: center;
     gap: 8px;
-  }
-  
-  .fashion-chat-attachment-button {
-    height: 32px;
-    width: 32px;
-    border-radius: 9999px;
-    color: #61788a;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .fashion-chat-attachment-icon {
-    height: 20px;
-    width: 20px;
-  }
-  
-  .fashion-chat-send-button {
-    border-radius: 9999px;
-    background-color: #2194f2;
-    padding: 4px 16px;
-    color: white;
-  }
-  
-  .fashion-chat-send-button:hover {
+  }  
+  .fashion-chat-send-button:hover,
+  .fashion-chat-attachment-button:hover {
     background-color: rgba(33, 148, 242, 0.9);
   }
   
@@ -210,19 +188,23 @@
     gap: 12px;
   }
   
-  .fashion-chat-send-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #2194f2;
-    color: white;
-    border-radius: 9999px;
-    padding: 8px;
-    width: 40px;
-    height: 40px;
-  }
-  
-  .fashion-chat-send-icon {
-    color: white;
-  }
-  
+ 
+.fashion-chat-attachment-button,
+.fashion-chat-send-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background-color: #2194f2;
+  padding: 8px;
+  width: 40px;  /* Match the send button */
+  height: 40px; /* Match the send button */
+  color: white;
+}
+
+.fashion-chat-attachment-icon,
+.fashion-chat-send-icon {
+  width: 20px !important;  
+  height: 20px !important;
+  color: white !important; 
+}

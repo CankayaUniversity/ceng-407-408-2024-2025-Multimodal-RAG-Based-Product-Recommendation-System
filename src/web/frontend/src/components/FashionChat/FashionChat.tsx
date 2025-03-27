@@ -45,6 +45,13 @@ function FashionAIChat() {
     setLoading(false);
   };
 
+  // Handle Enter key press
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleMessage();
+    }
+  };
+
   return (
     <div className="fashion-chat-container">
       {/* Header */}
@@ -93,16 +100,21 @@ function FashionAIChat() {
             placeholder="Type a message..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
+            onKeyPress={handleKeyPress} // Allow sending with Enter key
           />
           <div className="fashion-chat-input-actions">
-            <Button variant="ghost" className="fashion-chat-attachment-button">
-              <Paperclip className="fashion-chat-attachment-icon" />
+            <Button className="fashion-chat-attachment-button">
+              <Paperclip size={20} className="fashion-chat-attachment-icon" />
             </Button>
             <Button
               onClick={handleMessage}
               disabled={loading || !message.trim()}
               className="fashion-chat-send-button">
-              <Send size={20} className="fashion-chat-send-icon" />
+              <Send
+                size={20}
+                color="white"
+                className="fashion-chat-send-icon"
+              />
             </Button>
           </div>
         </div>
