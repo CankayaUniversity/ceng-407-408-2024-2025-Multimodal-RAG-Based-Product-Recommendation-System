@@ -20,11 +20,9 @@ function FashionAIChat() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
 
-
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
@@ -43,53 +41,37 @@ function FashionAIChat() {
   const handleMessage = async () => {
     if (!message.trim() && !image) return;
 
-
-    const userMessage: Message = { text: message, sender: "user", imageBase64: image };
+    const userMessage: Message = {
+      text: message,
+      sender: "user",
+      imageBase64: image,
+    };
     setMessages((prev) => [...prev, userMessage]);
     setMessage("");
     setLoading(true);
 
     try {
-      if (message.trim()) {
-        const botResponseText = await sendMessageToBackend(message);
-        setMessages((prev) => [
-          ...prev,
-          { text: botResponseText, sender: "bot", imageBase64: undefined }, // No image for the bot response
-        ]);
-      }
+      // Call the sendMessageToBackend with both message and image
+      const botResponseText = await sendMessageToBackend(message, image);
 
-      if (image) {
-        const imageData = { imageBase64: image };
-
-        const fileResponse = await fetch("http://localhost:3001/upload", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(imageData),
-        });
-
-        const fileData = await fileResponse.json();
-        if (fileData.success) {
-          setMessages((prev) => [
-            ...prev,
-            { text: "Image uploaded successfully!", sender: "bot", imageBase64: image },
-          ]);
-        } else {
-          setMessages((prev) => [
-            ...prev,
-            { text: "Error: Image upload failed.", sender: "bot", imageBase64: undefined },
-          ]);
-        }
-      }
+      // Add the bot's response
+      setMessages((prev) => [
+        ...prev,
+        { text: botResponseText, sender: "bot", imageBase64: undefined }, // No image for the bot response
+      ]);
     } catch (error) {
       console.error("Error communicating with backend:", error);
       setMessages((prev) => [
         ...prev,
-        { text: "Error: Unable to reach the server.", sender: "bot", imageBase64: undefined },
+        {
+          text: "Error: Unable to reach the server.",
+          sender: "bot",
+          imageBase64: undefined,
+        },
       ]);
     }
 
+    // Reset states after handling the message
     setImage(undefined);
     setFilePreview(null);
     setFile(null);
@@ -167,7 +149,11 @@ function FashionAIChat() {
           {/* Display the image preview */}
           {filePreview && (
             <div className="fashion-chat-image-preview">
-              <img src={filePreview} alt="Preview" className="fashion-chat-preview-image" />
+              <img
+                src={filePreview}
+                alt="Preview"
+                className="fashion-chat-preview-image"
+              />
             </div>
           )}
           <div className="fashion-chat-input-actions">
