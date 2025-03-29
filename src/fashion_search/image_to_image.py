@@ -8,10 +8,6 @@ from fashion_clip.fashion_clip import FashionCLIP
 import os
 from dotenv import load_dotenv
 
-
-
-load_dotenv()
-
 class ImageToImageSearch:
     def __init__(self, qdrant_url: str, api_key: str):
         self.client = QdrantClient(url=qdrant_url, api_key=api_key)
@@ -43,6 +39,8 @@ class ImageToImageSearch:
     
 if __name__ == "__main__":
     
+    load_dotenv()
+
     qdrant_url = os.getenv("qdrant_url")
     api_key = os.getenv("qdrant_api_key")
     
