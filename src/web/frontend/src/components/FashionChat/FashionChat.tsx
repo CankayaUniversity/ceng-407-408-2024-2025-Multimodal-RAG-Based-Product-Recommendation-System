@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { Search, Paperclip, Send } from "lucide-react";
+import { Paperclip, Send } from "lucide-react";
 import Avatar from "../ui/Avatar";
 import Button from "../ui/Button";
 import Input from "../ui/Input";
 import SuggestionItem from "../SuggestionItem/SuggestionItem";
+import Header from "../Header/Header";
 import "./FashionChat.css";
 import { useNavigate } from "react-router-dom";
 import { Message } from "../../types/message";
@@ -19,6 +20,36 @@ function FashionAIChat() {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/login", { state: { from: location.pathname } });
+      return;
+    }
+
+    const checkToken = async () => {
+      try {
+        const response = await fetch("http://localhost:3001/auth/check", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          localStorage.removeItem("token");
+          navigate("/login", { state: { from: location.pathname } });
+        }
+      } catch (error) {
+        console.error("Token check error:", error);
+        navigate("/login", { state: { from: location.pathname } });
+      }
+    };
+
+    checkToken();
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -51,13 +82,11 @@ function FashionAIChat() {
     setLoading(true);
 
     try {
-      // Call the sendMessageToBackend with both message and image
       const botResponseText = await sendMessageToBackend(message, image);
 
-      // Add the bot's response
       setMessages((prev) => [
         ...prev,
-        { text: botResponseText, sender: "bot", imageBase64: undefined }, // No image for the bot response
+        { text: botResponseText, sender: "bot", imageBase64: undefined },
       ]);
     } catch (error) {
       console.error("Error communicating with backend:", error);
@@ -71,14 +100,12 @@ function FashionAIChat() {
       ]);
     }
 
-    // Reset states after handling the message
     setImage(undefined);
     setFilePreview(null);
     setFile(null);
     setLoading(false);
   };
 
-  // Handle Enter key press
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       handleMessage();
@@ -91,27 +118,7 @@ function FashionAIChat() {
 
   return (
     <div className="fashion-chat-container">
-      {/* Header */}
-      <header className="fashion-chat-header">
-        <div className="fashion-chat-logo" onClick={() => navigate("/")}>
-          <div className="fashion-chat-logo-icon"></div>
-          Fashion AI
-        </div>
-        <div className="fashion-chat-search-container">
-          <Search className="fashion-chat-search-icon" />
-          <Input className="fashion-chat-search-input" placeholder="Search" />
-        </div>
-        <div className="fashion-chat-header-actions">
-          <Button variant="ghost" className="fashion-chat-help-button">
-            Help
-          </Button>
-          <Avatar
-            image="https://placeholder.svg?height=32&width=32"
-            fallback="U"
-            alt="User"
-          />
-        </div>
-      </header>
+      <Header />
 
       {/* Main Content */}
       <main className="fashion-chat-main">
@@ -146,7 +153,6 @@ function FashionAIChat() {
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={handleKeyPress}
           />
-          {/* Display the image preview */}
           {filePreview && (
             <div className="fashion-chat-image-preview">
               <img
