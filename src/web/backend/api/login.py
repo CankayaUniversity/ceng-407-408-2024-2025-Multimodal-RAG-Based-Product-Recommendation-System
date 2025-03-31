@@ -19,6 +19,6 @@ def login():
     
     if user:
         token = create_token(email=email)
-        return jsonify({"message": "Login successful", "email": email, "token":token }), 200
+        return jsonify({"message": "Login successful", "email": email, "username":user["username"], "token":token }), 200
     else:
         return jsonify({"error": "Invalid credentials"}), 401

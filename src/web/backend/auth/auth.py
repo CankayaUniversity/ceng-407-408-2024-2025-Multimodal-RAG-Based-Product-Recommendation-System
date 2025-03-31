@@ -54,3 +54,8 @@ def auth_required(f):
 
         return f(*args, **kwargs)
     return decorated_function
+
+@auth_bp.route('/check', methods=['GET'])
+@auth_required
+def check_auth():
+    return jsonify({'message': 'Token is valid'}), 200
