@@ -51,9 +51,13 @@ class ImageToImageSearch:
 
 # if __name__ == "__main__":
     
+    
+#     qdrant_url = os.getenv("qdrant_url")
+#     api_key = os.getenv("qdrant_api_key")
+    
 #     searcher = ImageToImageSearch(qdrant_url, api_key)
 #     results = searcher.search(
-#         "https://static.zara.net/photos///2023/I/0/1/p/5039/627/119/2/w/448/5039627119_1_1_1.jpg?ts=1689599720236",
+#         "https://static.zara.net/photos///2023/I/0/1/p/7614/342/630/3/w/448/7614342630_1_1_1.jpg?ts=1687183159644",
 #         "clip_DRESSES_JUMPSUITS"
 #     )
 
@@ -63,3 +67,4 @@ class ImageToImageSearch:
 #         print(f"Product: {result.payload.get('product_name', 'N/A')}")
 #         print(f"Price: {result.payload.get('price', 'N/A')}")
 #         print(f"Image: {result.payload.get('image_url', '')}")
+        
