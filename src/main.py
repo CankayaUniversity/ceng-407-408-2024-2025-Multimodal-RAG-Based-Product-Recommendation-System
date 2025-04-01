@@ -1,21 +1,22 @@
 import os
-import base64
-import requests
 from dotenv import load_dotenv
-import google.generativeai as genai  
-
+from langchain.chains import LLMChain
+#from langchain.chat_models import ChatGoogleGenerativeAI
+from langchain.prompts import PromptTemplate
+from langchain_google_genai import GoogleGenerativeAI
 from fashion_search.text_to_image import TextToImageSearch  
 from fashion_search.image_to_text import ImageToTextGenerator
 from fashion_search.image_to_image import ImageToImageSearch
 
-
+# Load environment variables
+load_dotenv()
 
 
 def rag_pipeline(query_text, image_url=None):
-    #text based search
-    text_searcher = TextToImageSearch(collection_name=category) 
+    """Retrieval-Augmented Generation (RAG) pipeline using LangChain."""
+    category = "clip_SHIRTS"
+    text_searcher = TextToImageSearch(collection_name=category)
     text_results = text_searcher.search(query_text, n_results=5)
-
 
     context_parts = ["Retrieved products based on the text query:"]
     for result in text_results:
@@ -26,13 +27,9 @@ def rag_pipeline(query_text, image_url=None):
             f"Image URL: {payload.get('image_url', '')}"
         )
 
-    # image-based search if there is image input
     if image_url:
-        qdrant_url = os.getenv("qdrant_url")
-        api_key = os.getenv("qdrant_api_key")
-        image_searcher = ImageToImageSearch(qdrant_url, api_key)
+        image_searcher = ImageToImageSearch(os.getenv("qdrant_url"), os.getenv("qdrant_api_key"))
         image_results = image_searcher.search(image_url, category, n_results=5)
-        
         context_parts.append("\nRetrieved products based on the image query:")
         for result, col_name in image_results:
             payload = result.payload
@@ -42,35 +39,35 @@ def rag_pipeline(query_text, image_url=None):
                 f"Image URL: {payload.get('image_url', '')}"
             )
     
-    #context combining into a single prompt for the LLM
+    # Combine context into a single prompt
     context_str = "\n".join(context_parts)
-    prompt = (
-        f"Based on the following product details:\n{context_str}\n\n"
-        f"Provide a personalized recommendation with reasoning for a customer interested in '{query_text}'."
+    prompt = PromptTemplate.from_template(
+        """
+        Based on the following product details:
+        {context}
+        
+        Provide a personalized recommendation with reasoning for a customer interested in '{query_text}'.
+        In your response, please include the recommended product's image url along with the product name and reasoning.
+        """
     )
     
+    llm = GoogleGenerativeAI(model="gemini-1.5-pro", temperature=0.7, google_api_key = GOOGLE_API_KEY)
+    chain = LLMChain(llm=llm, prompt=prompt)
+    response = chain.run(context=context_str, query_text=query_text)
     
-    generator = ImageToTextGenerator(model="gemini-1.5-pro")
-    response = generator.model.generate_content(contents=[{"text": prompt}])
-    return response.text
-
-
+    return response
 
 if __name__ == "__main__":
-    load_dotenv()
     
-    GEMINI_API_KEY = os.getenv("gemini_api_key")
-    genai.configure(api_key=GEMINI_API_KEY)
-    
-    
-    query = "i need a long, chic dress to wear to a dinner date. i prefer shiny fabric."
 
-    image_url = "https://static.zara.net/photos///2023/I/0/1/p/8490/899/690/2/w/448/8490899690_1_1_1.jpg?ts=1692879490213"
+    GOOGLE_API_KEY = os.getenv("google_api_key")
+
+    if not GOOGLE_API_KEY:
+        raise ValueError("Google API key is missing! Ensure it's set in the .env file.")
+
     
-    category = "clip_DRESSES_JUMPSUITS"
-    
-    
+    query = "i need a summer shirt to wear to work in office. i prefer oversized fit."
+    image_url = "https://static.zara.net/photos///2023/I/0/1/p/3564/191/712/2/w/448/3564191712_6_1_1.jpg?ts=1692950069091"
     
     recommendation = rag_pipeline(query, image_url)
     print("Recommendation:\n", recommendation)
-    
