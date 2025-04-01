@@ -8,8 +8,18 @@ from fashion_clip.fashion_clip import FashionCLIP
 import os
 from dotenv import load_dotenv
 
+
+load_dotenv()
+
 class ImageToImageSearch:
     def __init__(self, qdrant_url: str, api_key: str):
+        
+        qdrant_url = os.getenv("qdrant_url")
+        api_key = os.getenv("qdrant_api_key")
+        if not qdrant_url or not api_key:
+            raise ValueError("qdrant_url or api_key not set in environment.")
+        
+        
         self.client = QdrantClient(url=qdrant_url, api_key=api_key)
         self.fclip = FashionCLIP('fashion-clip')
     
@@ -39,12 +49,6 @@ class ImageToImageSearch:
     
 if __name__ == "__main__":
     
-    load_dotenv()
-
-    qdrant_url = os.getenv("qdrant_url")
-    api_key = os.getenv("qdrant_api_key")
-    
-
     searcher = ImageToImageSearch(qdrant_url, api_key)
     results = searcher.search(
         "https://static.zara.net/photos///2023/I/0/1/p/5039/627/119/2/w/448/5039627119_1_1_1.jpg?ts=1689599720236",

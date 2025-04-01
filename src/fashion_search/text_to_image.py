@@ -9,8 +9,17 @@ import os
 from dotenv import load_dotenv
 
 
+load_dotenv()
+
 class TextToImageSearch:
     def __init__(self, collection_name: str):
+        
+        qdrant_url = os.getenv("qdrant_url")
+        api_key = os.getenv("qdrant_api_key")
+        if not qdrant_url or not api_key:
+            raise ValueError("qdrant_url or api_key not set in environment.")
+        
+        
         self.client = QdrantClient(url=qdrant_url, api_key=api_key)
         self.fclip = FashionCLIP('fashion-clip')
         self.collection_name = collection_name
@@ -30,10 +39,6 @@ class TextToImageSearch:
 
 
 if __name__ == "__main__":
-    load_dotenv()
-    
-    qdrant_url = os.getenv("qdrant_url")
-    api_key = os.getenv("qdrant_api_key")
 
     searcher = TextToImageSearch(collection_name="clip_DRESSES_JUMPSUITS")
     results = searcher.search("linen wide leg pants", n_results=5)
