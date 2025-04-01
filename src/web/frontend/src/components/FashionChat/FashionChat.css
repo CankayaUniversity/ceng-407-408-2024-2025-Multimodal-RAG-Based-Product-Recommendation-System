@@ -91,10 +91,12 @@
   }
   
   .fashion-chat-messages {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    margin-bottom: 32px;
+    height: 400px; 
+    overflow-y: auto;
+    padding: 1rem;
+    background-color: #f8f8f8;
+    border-radius: 8px;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
   }
   
   .fashion-chat-message {
