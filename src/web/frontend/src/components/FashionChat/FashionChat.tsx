@@ -82,8 +82,9 @@ function FashionAIChat() {
     setLoading(true);
 
     try {
-      const botResponseText = await sendMessageToBackend(message, image);
-
+      const token = localStorage.getItem("token");
+      const botResponseText = await sendMessageToBackend(message, image, token);
+      console.log(botResponseText);
       setMessages((prev) => [
         ...prev,
         { text: botResponseText, sender: "bot", imageBase64: undefined },

@@ -1,12 +1,13 @@
-export const sendMessageToBackend = async (message: string, image: string | undefined): Promise<string> => {
+export const sendMessageToBackend = async (message: string, image: string | undefined, token :string|null): Promise<string> => {
   try {
     let responseText = "";
-
     // 1. If there is a text message
     if (message.trim()) {
-      const textResponse = await fetch("http://localhost:3001/test", {
+      const textResponse = await fetch("http://localhost:3001/api/test", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+         },
         body: JSON.stringify({ message }),
       });
 
