@@ -47,17 +47,19 @@ class ImageToImageSearch:
 
         return [(result, collection_name) for result in sorted_results]
     
-if __name__ == "__main__":
     
-    searcher = ImageToImageSearch(qdrant_url, api_key)
-    results = searcher.search(
-        "https://static.zara.net/photos///2023/I/0/1/p/5039/627/119/2/w/448/5039627119_1_1_1.jpg?ts=1689599720236",
-        "clip_DRESSES_JUMPSUITS"
-    )
 
-    for idx, (result, col_name) in enumerate(results, 1):
-        print(f"\n#{idx} | Similarity: {1 - result.score:.2f}")
-        print(f"Collection: {col_name}")
-        print(f"Product: {result.payload.get('product_name', 'N/A')}")
-        print(f"Price: {result.payload.get('price', 'N/A')}")
-        print(f"Image: {result.payload.get('image_url', '')}")
+# if __name__ == "__main__":
+    
+#     searcher = ImageToImageSearch(qdrant_url, api_key)
+#     results = searcher.search(
+#         "https://static.zara.net/photos///2023/I/0/1/p/5039/627/119/2/w/448/5039627119_1_1_1.jpg?ts=1689599720236",
+#         "clip_DRESSES_JUMPSUITS"
+#     )
+
+#     for idx, (result, col_name) in enumerate(results, 1):
+#         print(f"\n#{idx} | Similarity: {1 - result.score:.2f}")
+#         print(f"Collection: {col_name}")
+#         print(f"Product: {result.payload.get('product_name', 'N/A')}")
+#         print(f"Price: {result.payload.get('price', 'N/A')}")
+#         print(f"Image: {result.payload.get('image_url', '')}")

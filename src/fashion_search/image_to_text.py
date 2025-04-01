@@ -41,14 +41,15 @@ class ImageToTextGenerator:
         return response.text  
 
 
-if __name__ == "__main__":
+
+# if __name__ == "__main__":
     
-    load_dotenv()
-    GEMINI_API_KEY = os.getenv("gemini_api_key")
+#     load_dotenv()
+#     GEMINI_API_KEY = os.getenv("gemini_api_key")
 
-    genai.configure(api_key=GEMINI_API_KEY)
+#     genai.configure(api_key=GEMINI_API_KEY)
 
-    image_url = "https://static.zara.net/photos///2023/I/0/1/p/4968/223/704/2/w/448/4968223704_1_1_1.jpg?ts=1692964746030"
-    generator = ImageToTextGenerator()
-    description = generator.generate_description(image_url)
-    print(description)
+#     image_url = "https://static.zara.net/photos///2023/I/0/1/p/4968/223/704/2/w/448/4968223704_1_1_1.jpg?ts=1692964746030"
+#     generator = ImageToTextGenerator()
+#     description = generator.generate_description(image_url)
+#     print(description)

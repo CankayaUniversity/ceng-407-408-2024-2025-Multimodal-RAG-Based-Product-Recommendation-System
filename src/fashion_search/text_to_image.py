@@ -38,13 +38,14 @@ class TextToImageSearch:
         return results
 
 
-if __name__ == "__main__":
 
-    searcher = TextToImageSearch(collection_name="clip_DRESSES_JUMPSUITS")
-    results = searcher.search("linen wide leg pants", n_results=5)
+# if __name__ == "__main__":
 
-    for idx, result in enumerate(results, 1):
-        print(f"\n#{idx} | Score: {result.score:.2f}")
-        print(f"Product: {result.payload.get('product_name', 'N/A')}")
-        print(f"Price: {result.payload.get('price', 'N/A')}")
-        print(f"Image URL: {result.payload.get('image_url', '')}")
+#     searcher = TextToImageSearch(collection_name="clip_DRESSES_JUMPSUITS")
+#     results = searcher.search("linen wide leg pants", n_results=5)
+
+#     for idx, result in enumerate(results, 1):
+#         print(f"\n#{idx} | Score: {result.score:.2f}")
+#         print(f"Product: {result.payload.get('product_name', 'N/A')}")
+#         print(f"Price: {result.payload.get('price', 'N/A')}")
+#         print(f"Image URL: {result.payload.get('image_url', '')}")
