@@ -23,16 +23,16 @@ class ImageToImageSearch:
         self.client = QdrantClient(url=qdrant_url, api_key=api_key)
         self.fclip = FashionCLIP('fashion-clip')
     
-    def search(self, image_url: str, collection_name: str, n_results: int = 5) -> Optional[List[Tuple[models.ScoredPoint, str]]]:
+    def search(self, image:Image , collection_name: str, n_results: int = 5) -> Optional[List[Tuple[models.ScoredPoint, str]]]:
         headers = {'User-Agent': 'Mozilla/5.0'}
-        response = requests.get(image_url, headers=headers, timeout=10)
-        response.raise_for_status()
+        # response = requests.get(image_url, headers=headers, timeout=10)
+        # response.raise_for_status()
 
-        if 'image' not in response.headers.get('Content-Type', ''):
-            raise ValueError("URL does not point to a valid image")
+        # if 'image' not in response.headers.get('Content-Type', ''):
+        #     raise ValueError("URL does not point to a valid image")
 
-        img = Image.open(io.BytesIO(response.content)).convert('RGB').resize((224, 224))
-        img_emb = self.fclip.encode_images([img], batch_size=1)[0]
+        # img = Image.open(io.BytesIO(response.content)).convert('RGB').resize((224, 224))
+        img_emb = self.fclip.encode_images([image], batch_size=1)[0]
         img_emb_normalized = img_emb / np.linalg.norm(img_emb)
 
         results = self.client.search(

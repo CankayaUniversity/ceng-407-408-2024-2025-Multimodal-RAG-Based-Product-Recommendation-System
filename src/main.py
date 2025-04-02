@@ -7,11 +7,24 @@ from langchain.memory import ConversationBufferMemory
 from fashion_search.text_to_image import TextToImageSearch  
 from fashion_search.image_to_text import ImageToTextGenerator
 from fashion_search.image_to_image import ImageToImageSearch
+import io
+from PIL import Image
+import base64
+from time import sleep
 
 
 load_dotenv()
 
-def rag_pipeline(query_text, category, image_url=None, memory=None):
+
+def decode_base64_image(image_base64: str) -> Image.Image:
+    """Decode a base 64 encoded image string and return Pil iamge object"""
+    image_base64 = image_base64.split(",")[1]
+    image_data = base64.b64decode(image_base64)
+    image = Image.open(io.BytesIO(image_data)).convert('RGB')
+    return image
+
+
+def rag_pipeline(query_text, category, image_base64=None, memory=None):
     """Retrieval-Augmented Generation (RAG) pipeline using LangChain with conversation history."""
     valid_categories = [
         "clip_BASICS", "clip_BLAZERS", "clip_DRESSES_JUMPSUITS", "clip_JACKETS", "clip_KNITWEAR", 
@@ -37,9 +50,12 @@ def rag_pipeline(query_text, category, image_url=None, memory=None):
         )
 
 
-    if image_url:
+    if image_base64:
+        
+        image = decode_base64_image(image_base64)
+        
         image_searcher = ImageToImageSearch(os.getenv("qdrant_url"), os.getenv("qdrant_api_key"))
-        image_results = image_searcher.search(image_url, category, n_results=5)
+        image_results = image_searcher.search(image, category, n_results=5)
         context_parts.append("\nRetrieved products based on the image query:")
         for result, col_name in image_results:
             payload = result.payload
@@ -61,7 +77,7 @@ def rag_pipeline(query_text, category, image_url=None, memory=None):
         {context}
         
         Provide a personalized recommendation with reasoning for a customer interested in '{query_text}'. 
-        Use the uploaded image by user in your recommendation, the uploaded image is '{image_url}'.
+        Use the uploaded image by user in your recommendation, the uploaded image is '{image_base64}'.
         In your response, please include the recommended product's image URL along with the product name and reasoning.
         """
     )
@@ -69,7 +85,7 @@ def rag_pipeline(query_text, category, image_url=None, memory=None):
     
     llm = GoogleGenerativeAI(model="gemini-1.5-pro", temperature=0.7, google_api_key=os.getenv("GOOGLE_API_KEY"))
     chain = LLMChain(llm=llm, prompt=prompt, memory=memory)
-    response = chain.run(context=context_str, query_text=query_text, image_url=image_url)
+    response = chain.run(context=context_str, query_text=query_text, image_base64= image_base64)
     
     return response
 
@@ -86,13 +102,19 @@ if __name__ == "__main__":
 
     query = "I need a yellow dress for a summer night out. It should have floral prints. Please consider the uploaded image as well."
     category = "clip_DRESSES_JUMPSUITS"  
-    image_url = "https://static.zara.net/photos///2023/I/0/1/p/1165/152/302/2/w/448/1165152302_1_1_1.jpg?ts=1692183074739"
     
-    recommendation = rag_pipeline(query, category, image_url, memory)
+    f = open("ornek.txt", "r")
+    image_base64 = f.readline()
+    print(image_base64)
+    
+    
+    recommendation = rag_pipeline(query, category, image_base64, memory)
     print("Recommendation:\n", recommendation)
     
     
+    sleep(60)
+    
     #   follow-up query with chat history included
     followup_query = "I liked that suggestion, but can you recommend a piece with more flowers?"
-    followup_recommendation = rag_pipeline(followup_query, category, image_url, memory)
+    followup_recommendation = rag_pipeline(followup_query, category, image_base64, memory)
     print("Follow-up Recommendation:\n", followup_recommendation)

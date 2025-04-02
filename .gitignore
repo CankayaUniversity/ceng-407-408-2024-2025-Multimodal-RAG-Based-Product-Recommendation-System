@@ -3,6 +3,7 @@
 venv
 venv/
 .vscode/
+ornek.txt
 # Logs
 logs
 *.log
