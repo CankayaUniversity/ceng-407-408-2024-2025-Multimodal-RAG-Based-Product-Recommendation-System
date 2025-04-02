@@ -10,36 +10,44 @@ import {
   Grid,
 } from "@mui/material";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation} from "react-router-dom";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleLogin = async () => {
-    try {
-      const response = await fetch("http://localhost:3001/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+  const location = useLocation();
+const navigate = useNavigate();
 
-      const data = await response.json();
+const handleLogin = async () => {
+  try {
+    const response = await fetch("http://localhost:3001/api/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    });
 
-      if (response.ok) {
-        console.log("Login successful", data);
-        // Handle successful login (e.g., redirect or save token)
-      } else {
-        setError(data.error || "Login failed");
-      }
-    } catch (error) {
-      setError("An error occurred. Please try again.");
-      console.error("Login error:", error);
+    const data = await response.json();
+
+    if (response.ok) {
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("email", data.email);
+      localStorage.setItem("username", data.username);
+
+
+      const redirectTo = location.state?.from || "/";
+      navigate(redirectTo);
+    } else {
+      setError(data.error || "Login failed");
     }
-  };
+  } catch (error) {
+    setError("An error occurred. Please try again.");
+    console.error("Login error:", error);
+  }
+};
 
   return (
     <>
