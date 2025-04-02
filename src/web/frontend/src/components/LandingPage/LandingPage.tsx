@@ -14,13 +14,14 @@ function LandingPage(): React.ReactElement {
       <Header />
       <main className="main-content">
         <Hero />
-        <button className="btn btn-primary" onClick={() => navigate("/chat")}>
-          <Bot
-            className="bot-icon"
-            style={{ cursor: "pointer", width: 36, height: 36 }}
-          />
-          Start chatting with ai for recomendations!
-        </button>
+
+        <div className="chat-button-wrapper">
+          <button className="btn btn-primary" onClick={() => navigate("/chat")}>
+            <Bot className="bot-icon" style={{ width: 36, height: 36 }} />
+            Start chatting with AI for recommendations!
+          </button>
+        </div>
+
         <Categories />
         <Brands />
       </main>
