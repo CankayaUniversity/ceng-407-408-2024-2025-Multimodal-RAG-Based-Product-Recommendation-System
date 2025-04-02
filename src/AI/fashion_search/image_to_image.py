@@ -12,15 +12,15 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class ImageToImageSearch:
-    def __init__(self, qdrant_url: str, api_key: str):
+    def __init__(self, VECTORDB_URL: str, api_key: str):
         
-        qdrant_url = os.getenv("qdrant_url")
-        api_key = os.getenv("qdrant_api_key")
-        if not qdrant_url or not api_key:
-            raise ValueError("qdrant_url or api_key not set in environment.")
+        VECTORDB_URL = os.getenv("VECTORDB_URL")
+        api_key = os.getenv("VECTORDB_API")
+        if not VECTORDB_URL or not api_key:
+            raise ValueError("VECTORDB_URL or api_key not set in environment.")
         
         
-        self.client = QdrantClient(url=qdrant_url, api_key=api_key)
+        self.client = QdrantClient(url=VECTORDB_URL, api_key=api_key)
         self.fclip = FashionCLIP('fashion-clip')
     
     def search(self, image:Image , collection_name: str, n_results: int = 5) -> Optional[List[Tuple[models.ScoredPoint, str]]]:
@@ -52,10 +52,10 @@ class ImageToImageSearch:
 # if __name__ == "__main__":
     
     
-#     qdrant_url = os.getenv("qdrant_url")
-#     api_key = os.getenv("qdrant_api_key")
+#     VECTORDB_URL = os.getenv("VECTORDB_URL")
+#     api_key = os.getenv("VECTORDB_API")
     
-#     searcher = ImageToImageSearch(qdrant_url, api_key)
+#     searcher = ImageToImageSearch(VECTORDB_URL, api_key)
 #     results = searcher.search(
 #         "https://static.zara.net/photos///2023/I/0/1/p/7614/342/630/3/w/448/7614342630_1_1_1.jpg?ts=1687183159644",
 #         "clip_DRESSES_JUMPSUITS"

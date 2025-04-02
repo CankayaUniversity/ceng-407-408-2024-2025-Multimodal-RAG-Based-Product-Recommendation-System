@@ -54,7 +54,7 @@ def rag_pipeline(query_text, category, image_base64=None, memory=None):
         
         image = decode_base64_image(image_base64)
         
-        image_searcher = ImageToImageSearch(os.getenv("qdrant_url"), os.getenv("qdrant_api_key"))
+        image_searcher = ImageToImageSearch(os.getenv("VECTORDB_URL"), os.getenv("VECTORDB_API"))
         image_results = image_searcher.search(image, category, n_results=5)
         context_parts.append("\nRetrieved products based on the image query:")
         for result, col_name in image_results:
