@@ -12,6 +12,7 @@ import base64
 def chat():
     body = json.loads(request.data)
     image = None
+    category  = body["category"]
     
     if body["imageBase64"]:
         image64 = body["imageBase64"]

@@ -1,12 +1,14 @@
 export const sendMessageToBackend = async (
   message: string,
   image: string | undefined,
-  token: string | null
+  token: string | null,
+  category: string // Added category parameter
 ): Promise<string> => {
   try {
     const payload = {
       message: message.trim() || null,
       imageBase64: image || null,
+      category: category || null, 
     };
 
     const response = await fetch("http://localhost:3001/api/chat", {
