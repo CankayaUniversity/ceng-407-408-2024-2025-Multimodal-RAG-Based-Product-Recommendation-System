@@ -1,9 +1,13 @@
 .venv/
-.venv
 venv
 venv/
 .vscode/
-ornek.txt
+.env
+__pycache__
+__pycache__/
+datasets/
+private.pem
+
 # Logs
 logs
 *.log
@@ -12,10 +16,6 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-
-.env
-.env/
-
 node_modules
 dist
 dist-ssr
