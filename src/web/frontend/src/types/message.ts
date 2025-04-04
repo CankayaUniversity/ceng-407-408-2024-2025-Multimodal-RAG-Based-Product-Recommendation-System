@@ -3,5 +3,6 @@ export interface Message {
     text?: string;
     sender: "user" | "bot";
     imageBase64?: string; // Optional property for the image
+    category?:string;
   }
   

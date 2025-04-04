@@ -1,41 +1,32 @@
-export const sendMessageToBackend = async (message: string, image: string | undefined, token :string|null): Promise<string> => {
+export const sendMessageToBackend = async (
+  message: string,
+  image: string | undefined,
+  token: string | null,
+  category: string // Added category parameter
+): Promise<string> => {
   try {
-    let responseText = "";
-    // 1. If there is a text message
-    if (message.trim()) {
-      const textResponse = await fetch("http://localhost:3001/api/test", {
-        method: "POST",
-        headers: { "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-         },
-        body: JSON.stringify({ message }),
-      });
+    const payload = {
+      message: message.trim() || null,
+      imageBase64: image || null,
+      category: category || null, 
+    };
 
-      const data = await textResponse.json();
-      responseText = data.response;
+    const response = await fetch("http://localhost:3001/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      return data.response || "Success!";
+    } else {
+      return `Error: ${data.error || "Request failed"}`;
     }
-
-    // 2. If there is an image
-    if (image) {
-      const imageData = { imageBase64: image };
-
-      const fileResponse = await fetch("http://localhost:3001/upload", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(imageData),
-      });
-
-      const fileData = await fileResponse.json();
-      if (fileData.success) {
-        responseText = "Image uploaded successfully!";
-      } else {
-        responseText = "Error: Image upload failed.";
-      }
-    }
-
-    return responseText;
   } catch (error) {
     console.error("Error communicating with backend:", error);
     return "Error: Unable to reach the server.";

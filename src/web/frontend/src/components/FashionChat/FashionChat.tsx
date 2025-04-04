@@ -10,6 +10,28 @@ import { useNavigate } from "react-router-dom";
 import { Message } from "../../types/message";
 import { sendMessageToBackend } from "../../api/ChatService";
 
+const valid_categories = [
+  "clip_BASICS",
+  "clip_BLAZERS",
+  "clip_DRESSES_JUMPSUITS",
+  "clip_JACKETS",
+  "clip_KNITWEAR",
+  "clip_men_BLAZERS",
+  "clip_men_HOODIES_SWEATSHIRTS",
+  "clip_men_LINEN",
+  "clip_men_OVERSHIRTS",
+  "clip_men_POLO_SHIRTS",
+  "clip_men_SHIRTS",
+  "clip_men_SHOES",
+  "clip_men_SHORTS",
+  "clip_men_SWEATERS_CARDIGANS",
+  "clip_men_T-SHIRTS",
+  "clip_men_TROUSERS",
+  "clip_SHIRTS",
+  "clip_SHOES",
+  "clip_WAISTCOATS_GILETS",
+];
+
 function FashionAIChat() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
@@ -17,6 +39,8 @@ function FashionAIChat() {
   const [file, setFile] = useState<File | null>(null);
   const [image, setImage] = useState<string | undefined>(undefined);
   const [filePreview, setFilePreview] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
@@ -72,22 +96,38 @@ function FashionAIChat() {
   const handleMessage = async () => {
     if (!message.trim() && !image) return;
 
-    const userMessage: Message = {
-      text: message,
-      sender: "user",
-      imageBase64: image,
-    };
-    setMessages((prev) => [...prev, userMessage]);
+    // Directly add the user's message to the state
+    setMessages((prev) => [
+      ...prev,
+      {
+        text: message,
+        sender: "user",
+        imageBase64: image,
+        category: selectedCategory, // Send selected category directly
+      },
+    ]);
+
     setMessage("");
     setLoading(true);
 
     try {
       const token = localStorage.getItem("token");
-      const botResponseText = await sendMessageToBackend(message, image, token);
-      console.log(botResponseText);
+      const botResponseText = await sendMessageToBackend(
+        message,
+        image,
+        token,
+        selectedCategory
+      );
+
+      // Add bot's response
       setMessages((prev) => [
         ...prev,
-        { text: botResponseText, sender: "bot", imageBase64: undefined },
+        {
+          text: botResponseText,
+          sender: "bot",
+          imageBase64: undefined,
+          category: undefined, // Bot's response doesn't need a category
+        },
       ]);
     } catch (error) {
       console.error("Error communicating with backend:", error);
@@ -97,6 +137,7 @@ function FashionAIChat() {
           text: "Error: Unable to reach the server.",
           sender: "bot",
           imageBase64: undefined,
+          category: undefined, // Error message doesn't need a category
         },
       ]);
     }
@@ -120,7 +161,6 @@ function FashionAIChat() {
   return (
     <div className="fashion-chat-container">
       <Header />
-
       {/* Main Content */}
       <main className="fashion-chat-main">
         <h1 className="fashion-chat-title">Chat with me</h1>
@@ -147,6 +187,20 @@ function FashionAIChat() {
 
         {/* Message Input */}
         <div className="fashion-chat-input-container">
+          {/* Category Selection Dropdown */}
+          <select
+            className="fashion-chat-category-select"
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}>
+            <option value="">Select Category</option>
+            {valid_categories.map((category) => (
+              <option key={category} value={category}>
+                {category.replace("clip_", "").replace("_", " ")}
+              </option>
+            ))}
+          </select>
+
+          {/* Message Input */}
           <Input
             className="fashion-chat-input"
             placeholder="Type a message..."
@@ -154,6 +208,7 @@ function FashionAIChat() {
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={handleKeyPress}
           />
+
           {filePreview && (
             <div className="fashion-chat-image-preview">
               <img
@@ -163,6 +218,8 @@ function FashionAIChat() {
               />
             </div>
           )}
+
+          {/* Action Buttons */}
           <div className="fashion-chat-input-actions">
             <Button
               onClick={handleAttachmentClick}
@@ -179,23 +236,6 @@ function FashionAIChat() {
                 className="fashion-chat-send-icon"
               />
             </Button>
-          </div>
-        </div>
-
-        {/* Suggestions */}
-        <div className="fashion-chat-suggestions">
-          <h2 className="fashion-chat-suggestions-title">Suggestions</h2>
-          <div className="fashion-chat-suggestions-grid">
-            {["Women's fashion", "Men's fashion", "Shoes", "Bags"].map(
-              (category) => (
-                <SuggestionItem
-                  key={category}
-                  title={category}
-                  subtitle={category}
-                  image="https://placeholder.svg?height=48&width=48"
-                />
-              )
-            )}
           </div>
         </div>
       </main>

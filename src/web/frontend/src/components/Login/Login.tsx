@@ -38,7 +38,7 @@ const handleLogin = async () => {
       localStorage.setItem("username", data.username);
 
 
-      const redirectTo = location.state?.from || "/";
+      const redirectTo = "/"; // location.state?.from || last visited page not stored
       navigate(redirectTo);
     } else {
       setError(data.error || "Login failed");
