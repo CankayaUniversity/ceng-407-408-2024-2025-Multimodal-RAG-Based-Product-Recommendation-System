@@ -7,7 +7,7 @@ __pycache__
 __pycache__/
 datasets/
 private.pem
-ornek.txt
+.vite
 
 # Logs
 logs
