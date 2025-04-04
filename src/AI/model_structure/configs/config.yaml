@@ -1,7 +1,0 @@
-database:
-  url: "https://bd8424ba-78b3-4911-99d7-246c45a6a7e6.europe-west3-0.gcp.cloud.qdrant.io:6333"
-
-database_init:
-  source_file: "zara_women.csv"
-  base_collection_name: "base"
-  categories: [] # leave blank for all
