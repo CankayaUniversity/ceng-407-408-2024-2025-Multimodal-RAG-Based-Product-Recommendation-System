@@ -9,7 +9,7 @@ datasets/
 private.pem
 .vite
 
-# Logs
+# Log
 logs
 *.log
 npm-debug.log*
