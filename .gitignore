@@ -1,14 +1,5 @@
 .venv/
-venv
-venv/
 .vscode/
-.env
-__pycache__
-__pycache__/
-datasets/
-private.pem
-.vite
-
 # Logs
 logs
 *.log
@@ -17,6 +8,7 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+
 node_modules
 dist
 dist-ssr
