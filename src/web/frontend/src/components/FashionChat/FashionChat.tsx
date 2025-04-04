@@ -112,11 +112,13 @@ function FashionAIChat() {
 
     try {
       const token = localStorage.getItem("token");
+      const email = localStorage.getItem("email");
       const botResponseText = await sendMessageToBackend(
         message,
         image,
         token,
-        selectedCategory
+        selectedCategory,
+        email
       );
 
       // Add bot's response

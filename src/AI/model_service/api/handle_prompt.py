@@ -7,10 +7,10 @@ from box import Box
 def handle_prompt():
     data = Box(request.get_json())
 
-    if not data.email or not data.query or data.category or data.image_base64:
+    if not data.email or not data.query or not data.category:
         return jsonify({
-        "message": "Successfully executed.",
-        "response": recommendation
+        "message": "Bad request.",
+        "response": "None"
     }), 400
 
     memory = get_memory_for_user(data.email)
