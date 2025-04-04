@@ -1,0 +1,26 @@
+version: 1
+disable_existing_loggers: False
+
+formatters:
+  color:
+    (): colorlog.ColoredFormatter
+    format: "%(log_color)s[%(levelname)s] %(asctime)s - %(name)s: %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"
+    log_colors:
+      DEBUG: cyan
+      INFO: green
+      WARNING: yellow
+      ERROR: red
+      CRITICAL: bold_red
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: color
+    stream: ext://sys.stdout
+
+loggers:
+  root:
+    level: DEBUG
+    handlers: [console]
