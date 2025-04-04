@@ -1,0 +1,24 @@
+.input {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #121417;
+    background-color: white;
+    border: 1px solid #e5e8eb;
+    border-radius: 4px;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  }
+  
+  .input:focus {
+    outline: none;
+    border-color: #2194f2;
+    box-shadow: 0 0 0 2px rgba(33, 148, 242, 0.25);
+  }
+  
+  .input::placeholder {
+    color: #61788a;
+  }
+  
+  
