@@ -1,6 +1,15 @@
 .venv/
+venv
+venv/
 .vscode/
-# Logs
+.env
+__pycache__
+__pycache__/
+datasets/
+private.pem
+.vite
+
+# Log
 logs
 *.log
 npm-debug.log*
