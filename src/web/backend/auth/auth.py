@@ -20,7 +20,7 @@ def load_keys():
 
 PRIVATE_KEY, PUBLIC_KEY = load_keys()
 
-TOKEN_EXP_MINUTES = 5
+TOKEN_EXP_MINUTES = 15
 
 def create_token(email):
     payload = {
