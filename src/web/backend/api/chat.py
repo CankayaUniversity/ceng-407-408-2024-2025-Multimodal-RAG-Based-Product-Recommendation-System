@@ -3,10 +3,6 @@ from flask import jsonify, request
 import requests
 from . import api_blueprint
 from auth import auth_required
-from PIL import Image
-import io
-from io import BytesIO
-import base64
 from box import Box
 
 @api_blueprint.route("/chat", methods=["POST"])
@@ -27,7 +23,7 @@ def chat():
 
 
     response = requests.post(
-        "http://localhost:3002/ai/handle_prompt",
+        "http://localhost:3002/ai/handle_prompt", # for docker host is: model_service:3002
         json=body
     )
 

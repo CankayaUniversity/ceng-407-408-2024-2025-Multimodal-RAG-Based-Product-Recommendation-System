@@ -1,0 +1,42 @@
+services:
+  model_service:
+    build:
+      context: ./src/AI/model_service
+    container_name: model_service
+    ports:
+      - "3002:3002"
+    env_file:
+      - .env 
+    networks:
+      - fashnet
+
+  backend:
+    build:
+      context: ./src/web/backend
+    container_name: backend
+    ports:
+      - "3001:3001"
+    networks:
+      - fashnet
+    env_file:
+      - .env 
+    depends_on:
+      - model_service
+
+  frontend:
+    build:
+      context: ./src/web/frontend
+    container_name: frontend
+    env_file:
+      - .env 
+    ports:
+      - "3000:3000"
+    networks:
+      - fashnet
+    depends_on:
+      - backend
+
+
+networks:
+  fashnet:
+    driver: bridge
