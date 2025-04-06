@@ -15,7 +15,7 @@ app.register_blueprint(api_blueprint, url_prefix='/ai')
 
 if __name__ == "__main__":
     
-    GOOGLE_API_KEY = os.getenv("google_api_key")
+    GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
     if not GOOGLE_API_KEY:
         raise ValueError("Google API key is missing! Ensure it's set in the .env file.")
     
