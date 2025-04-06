@@ -60,6 +60,8 @@ def rag_pipeline(query_text, category, image_base64=None, memory=None):
         Provide a personalized recommendation with reasoning for a customer interested in '{query_text}'. 
         Use the uploaded image by user in your recommendation, the uploaded image is '{image_base64}'.
         In your response, please include the recommended product's image URL along with the product name and reasoning.
+        Keep your response clear and short.
+        Make a list of keywords which are relevant to the product and the input query.
         """
     )
     
