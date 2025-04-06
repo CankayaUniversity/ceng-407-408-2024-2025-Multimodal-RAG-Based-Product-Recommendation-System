@@ -3,7 +3,6 @@ import { Paperclip, Send } from "lucide-react";
 import Avatar from "../ui/Avatar";
 import Button from "../ui/Button";
 import Input from "../ui/Input";
-import SuggestionItem from "../SuggestionItem/SuggestionItem";
 import Header from "../Header/Header";
 import "./FashionChat.css";
 import { useNavigate } from "react-router-dom";
@@ -92,6 +91,25 @@ function FashionAIChat() {
       reader.readAsDataURL(selectedFile);
     }
   };
+  // Utility to extract image URLs (full or partial)
+  const extractImageUrls = (text: string): string[] => {
+    const urls: string[] = [];
+
+    // 1. Extract full image URLs that match the Zara image pattern
+    const fullUrlRegex =
+      /(https:\/\/static\.zara\.net\/photos\/[\/\w\d\-\._]+(\?ts=[0-9]+)?)\b/gi;
+
+    // Match all full URLs in the text
+    const matches = [...text.matchAll(fullUrlRegex)];
+    matches.forEach((match) => urls.push(match[0]));
+
+    return urls;
+  };
+  const removeImageUrlLine = (text: string): string => {
+    // This regex matches any line that contains "**Image URL:**" (ignoring case)
+    // and removes it along with the newline.
+    return text.replace(/.*\*\*Image\s*URL:\*\*.*(?:\r?\n|$)/gi, "");
+  };
 
   const handleMessage = async () => {
     if (!message.trim() && !image) return;
@@ -120,15 +138,32 @@ function FashionAIChat() {
         selectedCategory,
         email
       );
+      // Extract image URLs from the bot's response text
+      // Extract image URLs from the response text
+      const extractedImageUrls = extractImageUrls(botResponseText);
+
+      // First, remove any line that contains "**Image URL:**"
+      let cleanText = removeImageUrlLine(botResponseText);
+
+      // Then, remove any leftover image URLs (if any still exist in the text)
+      cleanText = cleanText
+        .replace(
+          /https?:\/\/[^\s]+(?:\.(?:png|jpe?g|gif|webp))(\?ts=[^\s]*)?/gi,
+          ""
+        )
+        .replace(/\s+/g, " ")
+        .trim();
+      console.log("After cleanup:", cleanText);
 
       // Add bot's response
       setMessages((prev) => [
         ...prev,
         {
-          text: botResponseText,
+          text: cleanText,
           sender: "bot",
           imageBase64: undefined,
-          category: undefined, // Bot's response doesn't need a category
+          category: undefined,
+          imageUrls: extractedImageUrls,
         },
       ]);
     } catch (error) {
@@ -172,7 +207,10 @@ function FashionAIChat() {
           {messages.map((msg, index) => (
             <div key={index} className={`fashion-chat-message ${msg.sender}`}>
               <div className="fashion-chat-message-bubble">
-                <p>{msg.text}</p>
+                {/* Message Text */}
+                {msg.text && <p>{msg.text}</p>}
+
+                {/* User-uploaded image*/}
                 {msg.imageBase64 && (
                   <img
                     src={msg.imageBase64}
@@ -180,6 +218,16 @@ function FashionAIChat() {
                     className="fashion-chat-image"
                   />
                 )}
+
+                {/* Bot-sent image URLs */}
+                {msg.imageUrls?.map((url, i) => (
+                  <img
+                    key={i}
+                    src={url}
+                    alt={`Bot suggestion ${i + 1}`}
+                    className="fashion-chat-image"
+                  />
+                ))}
               </div>
             </div>
           ))}

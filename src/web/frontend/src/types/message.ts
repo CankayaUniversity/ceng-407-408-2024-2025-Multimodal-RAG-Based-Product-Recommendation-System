@@ -1,8 +1,7 @@
-// Assuming this is the definition of the Message type
 export interface Message {
-    text?: string;
-    sender: "user" | "bot";
-    imageBase64?: string; // Optional property for the image
-    category?:string;
-  }
-  
+  text: string;
+  sender: "user" | "bot";
+  imageBase64?: string;
+  category?: string;
+  imageUrls?: string[]; // ← new
+}
