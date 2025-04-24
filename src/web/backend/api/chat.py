@@ -4,6 +4,7 @@ import requests
 from . import api_blueprint
 from auth import auth_required
 from box import Box
+from utils.compress_base64_image import compress_base64_image
 
 @api_blueprint.route("/chat", methods=["POST"])
 @auth_required
@@ -13,11 +14,13 @@ def chat():
     email = body.email
     category = body.category
     image_base64 = body.imageBase64
+    
+    compressed_image_base64 = compress_base64_image(image_base64)
 
     body = {
         "email": email,
         "query": query,
-        "image_base64": image_base64,
+        "image_base64": compressed_image_base64,
         "category": category
     }
 
