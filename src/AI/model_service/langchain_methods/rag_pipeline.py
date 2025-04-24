@@ -51,6 +51,11 @@ def rag_pipeline(query_text, category, image_base64=None, memory=None):
     
     prompt = PromptTemplate.from_template(
         """
+        You are a personal stylist, helping users to find their needed fashion products.
+        You are going to provide personalized fashion recommendations to users.
+        Therefore you should only answer fashion based queries, and make suggestions about fashion.
+        Do not provide fashion recommendations to queries other than fashion.
+        
         Chat history:
         {chat_history}
         
@@ -62,12 +67,14 @@ def rag_pipeline(query_text, category, image_base64=None, memory=None):
         In your response, please include the recommended product's image URL along with the product name and reasoning.
         Keep your response clear and short.
         Make a list of keywords which are relevant to the product and the input query.
+        
+        If you think the context and the user's query are too irrelevant, do not recommend anything. Only answer the user's input query text.
         """
     )
     
     
     llm = GoogleGenerativeAI(model="gemini-1.5-pro", temperature=0.7, google_api_key=os.getenv("GOOGLE_API_KEY"))
     chain = LLMChain(llm=llm, prompt=prompt, memory=memory)
-    response = chain.run(context=context_str, query_text=query_text, image_base64= image_base64)
+    response = chain.run(context=context_str, query_text=query_text, image_base64= image_base64, chat_history=memory)
     
     return response

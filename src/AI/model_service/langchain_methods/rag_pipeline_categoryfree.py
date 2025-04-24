@@ -26,9 +26,9 @@ def rag_pipeline(query_text, category, image_base64=None, memory=None):
     if category == "No Category":
         context_parts.append("Retrieved products based on category-free search:")
         try:
-            # If an image is provided as base64, decode it to a PIL image.
+            
             image_input = decode_base64_image(image_base64) if image_base64 else None
-            searcher = CategoryFreeSearch()  # Instantiate category-free search class
+            searcher = CategoryFreeSearch() 
             results = searcher.search(text=query_text, image=image_input, n_results=5)
             if results:
                 for result, col_name in results:
@@ -43,7 +43,7 @@ def rag_pipeline(query_text, category, image_base64=None, memory=None):
         except Exception as e:
             context_parts.append(f"Error during category-free retrieval: {str(e)}")
     else:
-        # Category-specific: text search
+        
         text_searcher = TextToImageSearch(collection_name=category)
         text_results = text_searcher.search(query_text, n_results=5)
         context_parts.append("Retrieved products based on the text query:")
@@ -55,7 +55,7 @@ def rag_pipeline(query_text, category, image_base64=None, memory=None):
                 f"Image URL: {payload.get('image_url', '')}"
             )
         
-        # If an image is provided, run image-to-image search as well.
+        
         if image_base64:
             image = decode_base64_image(image_base64)
             image_searcher = ImageToImageSearch(os.getenv("VECTORDB_URL"), os.getenv("VECTORDB_API"))
@@ -73,6 +73,11 @@ def rag_pipeline(query_text, category, image_base64=None, memory=None):
     
     prompt = PromptTemplate.from_template(
         """
+        You are a personal stylist, helping users to find their needed fashion products.
+        You are going to provide personalized fashion recommendations to users.
+        Therefore you should only answer fashion based queries, and make suggestions about fashion.
+        Do not provide fashion recommendations to queries other than fashion.
+        
         Chat history:
         {chat_history}
         
@@ -80,9 +85,12 @@ def rag_pipeline(query_text, category, image_base64=None, memory=None):
         {context}
         
         Provide a personalized recommendation with reasoning for a customer interested in '{query_text}'. 
-        Use the uploaded image (if available) in your recommendation, the uploaded image is '{image_base64}'.
-        Include the recommended product's image URL, product name, and a brief explanation.
-        Also, list keywords relevant to the product and query.
+        Use the uploaded image by user in your recommendation, the uploaded image is '{image_base64}'.
+        In your response, please include the recommended product's image URL along with the product name and reasoning.
+        Keep your response clear and short.
+        Make a list of keywords which are relevant to the product and the input query.
+        
+        If you think the context and the user's query are too irrelevant, do not recommend anything. Only answer the user's input query text.
         """
     )
     
@@ -96,7 +104,7 @@ def rag_pipeline(query_text, category, image_base64=None, memory=None):
         context=context_str,
         query_text=query_text,
         image_base64=image_base64,
-        chat_history=""  # Optionally include conversation history here.
+        chat_history=memory
     )
     
     return response
