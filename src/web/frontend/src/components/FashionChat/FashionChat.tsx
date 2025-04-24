@@ -29,6 +29,7 @@ const valid_categories = [
   "clip_SHIRTS",
   "clip_SHOES",
   "clip_WAISTCOATS_GILETS",
+  "No Category"
 ];
 
 function FashionAIChat() {
