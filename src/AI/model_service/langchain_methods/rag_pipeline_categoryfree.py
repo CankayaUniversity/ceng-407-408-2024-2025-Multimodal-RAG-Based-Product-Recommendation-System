@@ -1,5 +1,5 @@
 from utils import decode_base64_image
-from fashion_search import TextToImageSearch, ImageToImageSearch, categoryfree_search
+from fashion_search import TextToImageSearch, ImageToImageSearch, CategoryFreeSearch
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 from langchain_google_genai import GoogleGenerativeAI
@@ -28,7 +28,7 @@ def rag_pipeline(query_text, category, image_base64=None, memory=None):
         try:
             # If an image is provided as base64, decode it to a PIL image.
             image_input = decode_base64_image(image_base64) if image_base64 else None
-            searcher = categoryfree_search()  # Instantiate category-free search class
+            searcher = CategoryFreeSearch()  # Instantiate category-free search class
             results = searcher.search(text=query_text, image=image_input, n_results=5)
             if results:
                 for result, col_name in results:
@@ -80,7 +80,7 @@ def rag_pipeline(query_text, category, image_base64=None, memory=None):
         {context}
         
         Provide a personalized recommendation with reasoning for a customer interested in '{query_text}'. 
-        Use the uploaded image (if available) in your recommendation. 
+        Use the uploaded image (if available) in your recommendation, the uploaded image is '{image_base64}'.
         Include the recommended product's image URL, product name, and a brief explanation.
         Also, list keywords relevant to the product and query.
         """

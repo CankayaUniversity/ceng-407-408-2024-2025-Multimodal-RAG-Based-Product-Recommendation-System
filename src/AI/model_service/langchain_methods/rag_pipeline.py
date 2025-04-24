@@ -1,5 +1,5 @@
 from utils import decode_base64_image
-from fashion_search import TextToImageSearch, ImageToImageSearch,categoryfree_search
+from fashion_search import TextToImageSearch, ImageToImageSearch
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 from langchain_google_genai import GoogleGenerativeAI

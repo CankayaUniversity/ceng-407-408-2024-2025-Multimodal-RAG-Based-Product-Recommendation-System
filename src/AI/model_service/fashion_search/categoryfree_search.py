@@ -110,4 +110,4 @@ class CategoryFreeSearch:
         return final_results
 
 
-categoryfree_search = CategoryFreeSearch
+# categoryfree_search = CategoryFreeSearch
