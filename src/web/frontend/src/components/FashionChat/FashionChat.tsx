@@ -40,7 +40,8 @@ function FashionAIChat() {
   const [file, setFile] = useState<File | null>(null);
   const [image, setImage] = useState<string | undefined>(undefined);
   const [filePreview, setFilePreview] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] =
+    useState<string>("No Category");
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -246,7 +247,7 @@ function FashionAIChat() {
               className="fashion-chat-category-select"
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}>
-              <option value="No Category">Select</option>
+              <option value="">Select</option>
               {valid_categories.map((category) => (
                 <option key={category} value={category}>
                   {category.replace("clip_", "").replace("_", " ")}
