@@ -8,6 +8,7 @@ import "./FashionChat.css";
 import { useNavigate } from "react-router-dom";
 import { Message } from "../../types/message";
 import { sendMessageToBackend } from "../../api/ChatService";
+import TextareaAutosize from "react-textarea-autosize";
 
 const valid_categories = [
   "clip_BASICS",
@@ -29,7 +30,7 @@ const valid_categories = [
   "clip_SHIRTS",
   "clip_SHOES",
   "clip_WAISTCOATS_GILETS",
-  "No Category"
+  "No Category",
 ];
 
 function FashionAIChat() {
@@ -186,9 +187,10 @@ function FashionAIChat() {
     setLoading(false);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      handleMessage();
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault(); // prevent default newline
+      handleMessage(); // send the message
     }
   };
 
@@ -236,57 +238,57 @@ function FashionAIChat() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Message Input */}
         <div className="fashion-chat-input-container">
-          {/* Category Selection Dropdown */}
-          <select
-            className="fashion-chat-category-select"
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}>
-            <option value="">Select Category</option>
-            {valid_categories.map((category) => (
-              <option key={category} value={category}>
-                {category.replace("clip_", "").replace("_", " ")}
-              </option>
-            ))}
-          </select>
+          {/* Chat Input Row */}
+          <div className="fashion-chat-input-row">
+            {/* Category Dropdown */}
+            <select
+              className="fashion-chat-category-select"
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}>
+              <option value="No Category">Select</option>
+              {valid_categories.map((category) => (
+                <option key={category} value={category}>
+                  {category.replace("clip_", "").replace("_", " ")}
+                </option>
+              ))}
+            </select>
 
-          {/* Message Input */}
-          <Input
-            className="fashion-chat-input"
-            placeholder="Type a message..."
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-          />
+            {/* Growing Textarea */}
+            <TextareaAutosize
+              className="fashion-chat-input"
+              placeholder="Type a message..."
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={handleKeyPress}
+              minRows={1}
+              maxRows={5}
+            />
 
-          {filePreview && (
-            <div className="fashion-chat-image-preview">
-              <img
-                src={filePreview}
-                alt="Preview"
-                className="fashion-chat-preview-image"
-              />
+            {filePreview && (
+              <div className="fashion-chat-image-preview">
+                <img
+                  src={filePreview}
+                  alt="Preview"
+                  className="fashion-chat-preview-image"
+                />
+              </div>
+            )}
+            {/* Attachment and Send Buttons */}
+            <div className="fashion-chat-input-actions">
+              <Button
+                onClick={handleAttachmentClick}
+                className="fashion-chat-attachment-button">
+                <Paperclip size={20} className="fashion-chat-attachment-icon" />
+              </Button>
+
+              <Button
+                onClick={handleMessage}
+                disabled={loading || (!message.trim() && !image)}
+                className="fashion-chat-send-button">
+                <Send size={25} className="fashion-chat-send-icon" />
+              </Button>
             </div>
-          )}
-
-          {/* Action Buttons */}
-          <div className="fashion-chat-input-actions">
-            <Button
-              onClick={handleAttachmentClick}
-              className="fashion-chat-attachment-button">
-              <Paperclip size={20} className="fashion-chat-attachment-icon" />
-            </Button>
-            <Button
-              onClick={handleMessage}
-              disabled={loading || (!message.trim() && !image)}
-              className="fashion-chat-send-button">
-              <Send
-                size={25}
-                color="white"
-                className="fashion-chat-send-icon"
-              />
-            </Button>
           </div>
         </div>
       </main>

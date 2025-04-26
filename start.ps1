@@ -1,4 +1,4 @@
-$VENV_PATH = "$PSScriptRoot\venv\Scripts\Activate.ps1"
+$VENV_PATH = "$PSScriptRoot\.venv\Scripts\Activate.ps1"
 
 if (!(Test-Path $VENV_PATH)) {
     Write-Host "Shared virtual environment not found: $VENV_PATH"

@@ -78,7 +78,7 @@
   .fashion-chat-main {
     flex: 1;
     padding: 24px;
-    max-width: 768px;
+    max-width: 900px;
     margin: 0 auto;
     width: 100%;
   }
@@ -143,53 +143,55 @@
   }
   
   .fashion-chat-input-container {
-    position: relative;
-    margin-bottom: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    background: white;
+    border-top: 1px solid #eee;
   }
   
+  .fashion-chat-input-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+  }
+
+  .fashion-chat-category-select {
+    flex: 0 0 120px; /* Fixed width */
+    padding: 8px 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    outline: none;
+    appearance: none;
+    color: #333;
+  }
+
   .fashion-chat-input {
-    width: 100%;
-    border-radius: 9999px;
-    border: 1px solid #e5e8eb;
-    background-color: #f0f2f5;
-    padding-left: 16px;
-    padding-right: 96px;
-    padding-top: 12px;
-    padding-bottom: 12px;
-    color: #121417;
+    flex: 1; /* Take the remaining space */
+    min-height: 40px;
+    max-height: 150px;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    resize: none;
+    overflow-y: auto;
+    transition: all 0.2s ease;
+    outline: none;
   }
-  
   .fashion-chat-input-actions {
-    position: absolute;
-    right: 8px;
-    top: 50%;
-    transform: translateY(-50%);
     display: flex;
     align-items: center;
-    gap: 8px;
-  }  
+    gap: 6px;
+  }
+ 
   .fashion-chat-send-button:hover,
   .fashion-chat-attachment-button:hover {
     background-color: rgba(33, 148, 242, 0.9);
   }
-  
-  .fashion-chat-suggestions {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-  
-  .fashion-chat-suggestions-title {
-    font-size: 20px;
-    font-weight: 700;
-    color: #121417;
-  }
-  
-  .fashion-chat-suggestions-grid {
-    display: grid;
-    gap: 12px;
-  }
-  
  
 .fashion-chat-attachment-button,
 .fashion-chat-send-button {
@@ -210,65 +212,39 @@
   height: 20px !important;
   color: white !important; 
 }
-.fashion-chat-input-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-}
 
-.fashion-chat-input {
-  flex-grow: 1;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
-}
-
-.fashion-chat-input-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-}
 
 .fashion-chat-attachment-button {
   margin-right: 10px;
 }
 
-.fashion-chat-send-button {
-  background-color: #2194f2;
-  color: white;
-  padding: 10px 15px;
-  border-radius: 50%;
+.fashion-chat-input {
+  transition: all 0.2s ease;
+}
+
+.fashion-chat-input-top {
   display: flex;
   align-items: center;
-  justify-content: center;
-  height: 45px;
-  width: 45px;
+}
+
+
+.fashion-chat-input-bottom {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
 }
 
 .fashion-chat-image-preview {
-  position: absolute;
-  top: -45px;
-  right: 15px;
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
+  display: flex;
+  justify-content: end;
+  align-items: center;
+  max-height: 100px;
   overflow: hidden;
-  border: 2px solid #2194f2;
-  background-color: #f0f2f5;
-  z-index: 10;
 }
 
 .fashion-chat-preview-image {
-  width: 100%;
-  height: 100%;
+  height: 80px;
+  width: auto;
+  border-radius: 8px;
   object-fit: cover;
 }
-
-.fashion-chat-send-icon,
-.fashion-chat-attachment-icon {
-  width: 20px;
-  height: 20px;
-}
-
