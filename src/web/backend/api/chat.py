@@ -26,7 +26,7 @@ def chat():
 
 
     response = requests.post(
-        "http://localhost:3002/ai/handle_prompt", # for docker host is: model_service:3002 (handle_prompt) (cat_free)
+        "http://localhost:3002/ai/cat_free", # for docker host is: model_service:3002 (handle_prompt) (cat_free)
         json=body
     )
 
