@@ -91,7 +91,9 @@ def rag_pipeline(query_text, category, image_base64=None, memory=None):
         Use the uploaded image by user in your recommendation, the uploaded image is '{image_base64}'.
         In your response, please include the recommended product's image URL along with the product name and reasoning.
         Keep your response clear and short.
-        Make a list of keywords which are relevant to the product and the input query.
+        Make a list of keywords which are relevant to the product, trends and the input query.
+        Use the current fashion trends efficiently, mention how the recommended product matches current fashion trends. 
+        Provide a short explanation of the fashion trends with the product as well.
         
         If you think the context and the user's query are too irrelevant, do not recommend anything. Only answer the user's input query text.
         """
