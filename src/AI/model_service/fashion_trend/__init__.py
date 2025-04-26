@@ -1,0 +1,1 @@
+from .trend import TrendFetcher
