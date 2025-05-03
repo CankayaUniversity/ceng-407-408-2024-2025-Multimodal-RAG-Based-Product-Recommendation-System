@@ -16,12 +16,9 @@ function App(): React.ReactElement {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/profile" element={<ProfilePage />} />
+        {/* <Route path="/profile/favorites" element={<ProfileFavorites />} */}
         <Route path="/profile/preferences" element={<ProfilePreferences />} />
-        {/* <Route path="/profile/favorites" element={<ProfileFavorites />} />
-        <Route path="/profile/past-searches" element={<ProfilePastSearches />} />
-
-        <Route path="/profile/trending" element={<ProfileTrending />} />
-        <Route path="/profile/upload-history" element={<ProfileUploadHistory />} /> */}
+        {/* <Route path="/profile/past-recommendations" element={<ProfilePastRecommendations />} /> */}
       </Routes>
     </Router>
   );

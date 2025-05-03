@@ -13,10 +13,8 @@ const ProfilePage: React.FC = () => {
             <ul>
               <li><Link to="/profile">Profile</Link></li>
               <li><Link to="/profile/favorites">Favorites</Link></li>
-              <li><Link to="/profile/past-searches">Past Searches</Link></li>
+              <li><Link to="/profile/past-recommendations">Past Recommendations</Link></li>
               <li><Link to="/profile/preferences">Preferences</Link></li>
-              <li><Link to="/profile/trending">Trending</Link></li>
-              <li><Link to="/profile/upload-history">Upload History</Link></li>
             </ul>
           </nav>
         </aside>
