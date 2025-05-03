@@ -4,6 +4,7 @@ import LandingPage from "./components/LandingPage/LandingPage";
 import FashionAIChat from "./components/FashionChat/FashionChat";
 import Login from "./components/Login/Login";
 import Register from "./components/Register/Register";
+import ProfilePage from "./components/ProfilePage/ProfilePage";
 
 function App(): React.ReactElement {
   return (
@@ -13,6 +14,7 @@ function App(): React.ReactElement {
         <Route path="/chat" element={<FashionAIChat />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/profile" element={<ProfilePage />} />
       </Routes>
     </Router>
   );

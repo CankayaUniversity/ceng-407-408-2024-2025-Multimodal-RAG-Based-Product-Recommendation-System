@@ -50,7 +50,7 @@ function Header(): React.ReactElement {
             </div>
             {dropdownOpen && (
               <div className="dropdown-menu">
-                <button onClick={() => navigate("/settings")}>Settings</button>
+                <button onClick={() => navigate("/profile")}>Profile</button>
                 <button onClick={handleLogout}>Logout</button>
               </div>
             )}
