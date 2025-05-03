@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import "./ProfilePage.css";
 import Header from "../Header/Header";
 
@@ -10,24 +11,12 @@ const ProfilePage: React.FC = () => {
         <aside className="profile-sidebar">
           <nav>
             <ul>
-              <li>
-                <a href="#">Profile</a>
-              </li>
-              <li>
-                <a href="#">Favorites</a>
-              </li>
-              <li>
-                <a href="#">Past Searches</a>
-              </li>
-              <li>
-                <a href="#">Preferences</a>
-              </li>
-              <li>
-                <a href="#">Trending</a>
-              </li>
-              <li>
-                <a href="#">Upload History</a>
-              </li>
+              <li><Link to="/profile">Profile</Link></li>
+              <li><Link to="/profile/favorites">Favorites</Link></li>
+              <li><Link to="/profile/past-searches">Past Searches</Link></li>
+              <li><Link to="/profile/preferences">Preferences</Link></li>
+              <li><Link to="/profile/trending">Trending</Link></li>
+              <li><Link to="/profile/upload-history">Upload History</Link></li>
             </ul>
           </nav>
         </aside>
@@ -41,30 +30,25 @@ const ProfilePage: React.FC = () => {
             />
             <input type="file" />
           </section>
+
           <section className="profile-section">
             <h2>Save your favorites</h2>
             <p>Any products you favorite will appear here</p>
-            <a href="#" className="see-all-link">
-              See all →
-            </a>
+            <Link to="/profile/favorites" className="see-all-link">See all →</Link>
           </section>
+
           <section className="profile-section">
             <h2>View your past searches</h2>
             <p>We'll show you the products you've searched for.</p>
-            <a href="#" className="see-all-link">
-              See all →
-            </a>
+            <Link to="/profile/past-searches" className="see-all-link">See all →</Link>
           </section>
+
           <section className="profile-section">
             <h2>Manage your preferences</h2>
-            <p>
-              Want to see more of the things you love? Tell us what you're
-              interested in
-            </p>
-            <a href="#" className="manage-preferences-link">
-              Manage preferences →
-            </a>
+            <p>Want to see more of the things you love? Tell us what you're interested in</p>
+            <Link to="/profile/preferences" className="manage-preferences-link">Manage preferences →</Link>
           </section>
+
           <section className="profile-section">
             <h2>Last Viewed Products</h2>
             <div className="last-viewed-products">
@@ -92,3 +76,7 @@ const ProfilePage: React.FC = () => {
 };
 
 export default ProfilePage;
+
+
+
+

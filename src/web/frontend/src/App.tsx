@@ -5,6 +5,7 @@ import FashionAIChat from "./components/FashionChat/FashionChat";
 import Login from "./components/Login/Login";
 import Register from "./components/Register/Register";
 import ProfilePage from "./components/ProfilePage/ProfilePage";
+import ProfilePreferences from "./components/ProfilePreferences/ProfilePreferences";
 
 function App(): React.ReactElement {
   return (
@@ -15,6 +16,12 @@ function App(): React.ReactElement {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/profile/preferences" element={<ProfilePreferences />} />
+        {/* <Route path="/profile/favorites" element={<ProfileFavorites />} />
+        <Route path="/profile/past-searches" element={<ProfilePastSearches />} />
+
+        <Route path="/profile/trending" element={<ProfileTrending />} />
+        <Route path="/profile/upload-history" element={<ProfileUploadHistory />} /> */}
       </Routes>
     </Router>
   );
