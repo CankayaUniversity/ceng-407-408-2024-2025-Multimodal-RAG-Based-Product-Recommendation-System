@@ -5,15 +5,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class TrendFetcher:
-    """
-    Fetches trending keywords from news articles using NewsAPI.
-
-    Attributes:
-        query (str): Keyword to search for in article titles and content.
-        page_size (int): Number of articles to fetch per request.
-        sources (list): List of news domains to restrict the search to.
-        api_key (str): NewsAPI key loaded from environment variable NEWS_API_KEY.
-    """
     def __init__(self,
                  query: str = "fashion",
                  page_size: int = 3,
@@ -28,13 +19,6 @@ class TrendFetcher:
         self.api_key = os.getenv("NEWS_API_KEY")
 
     def get_current_trends(self) -> str:
-        """
-        Queries the NewsAPI 'everything' endpoint for recent articles,
-        extracts keywords from titles, and returns a comma-separated list.
-
-        Returns:
-            str: Comma-separated keywords or an error/message string.
-        """
         if not self.api_key:
             return "Current trends cannot be retrieved because NEWS_API_KEY is not set."
 
