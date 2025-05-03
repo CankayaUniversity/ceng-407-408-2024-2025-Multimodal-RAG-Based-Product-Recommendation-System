@@ -71,3 +71,30 @@ class TrendFetcher:
             return f"HTTP error occurred: {msg}"
         except Exception as err:
             return f"Error retrieving current trends: {err}"
+        
+    def get_image_urls(self) -> str:
+        if not self.api_key:
+            return "Current trends cannot be retrieved because NEWS_API_KEY is not set."
+        
+        url = "https://newsapi.org/v2/everything"
+        params = {
+            "q": self.query,
+            "qInTitle": self.query,           
+            "sortBy": "publishedAt",
+            "pageSize": self.page_size,
+            "apiKey": self.api_key,
+            "domains": ",".join(self.sources),
+            "language": "en"
+        }
+        
+        try:
+            response = requests.get(url, params=params)
+            response.raise_for_status()
+            data = response.json()
+            articles = data.get("articles", [])
+            return [article["urlToImage"] for article in articles if article.get("urlToImage")]
+        
+        except Exception as err:
+            return f"Error retrieving current trends: {err}"
+        
+        

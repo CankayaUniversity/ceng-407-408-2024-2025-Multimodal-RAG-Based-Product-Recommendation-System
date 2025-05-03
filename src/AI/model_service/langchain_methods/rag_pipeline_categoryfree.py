@@ -10,6 +10,8 @@ def rag_pipeline(query_text, category, image_base64=None, memory=None):
     
     trend_fetcher = TrendFetcher()
     current_trends = trend_fetcher.get_current_trends()
+    image_urls = trend_fetcher.get_image_urls()
+    
     
     valid_categories = [
         "clip_BASICS", "clip_BLAZERS", "clip_DRESSES_JUMPSUITS", "clip_JACKETS", "clip_KNITWEAR", 
