@@ -1,38 +1,51 @@
-import React from 'react';
-import Card from '../Card/Card';
-import './Brands.css';
+import React, { useEffect, useState } from "react";
+import Card from "../Card/Card";
+import "./Brands.css";
 
 interface Brand {
-  id: number;
+  id: string;
   title: string;
-  subtitle: string;
   image: string;
+  url: string;
 }
 
 function Brands(): React.ReactElement {
-  const brands: Brand[] = [
-    { id: 1, title: "Nike Sportswear", subtitle: "Women", image: "https://placehold.co/300x300" },
-    { id: 2, title: "Adidas Originals", subtitle: "Men", image: "https://placehold.co/300x300" },
-    { id: 3, title: "Reebok", subtitle: "Women", image: "https://placehold.co/300x300" },
-    { id: 4, title: "Puma", subtitle: "Men", image: "https://placehold.co/300x300" },
-    { id: 5, title: "Under Armour", subtitle: "Women", image: "https://placehold.co/300x300" },
-    { id: 6, title: "The North Face", subtitle: "Men", image: "https://placehold.co/300x300" },
-    { id: 7, title: "Columbia", subtitle: "Women", image: "https://placehold.co/300x300" },
-    { id: 8, title: "Patagonia", subtitle: "Men", image: "https://placehold.co/300x300" }
-  ];
+  const [brands, setBrands] = useState<Brand[]>([]);
+
+  useEffect(() => {
+    fetch("http://localhost:3001/api/trends")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.trends) {
+          setBrands(data.trends);
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to fetch trends:", error);
+      });
+  }, []);
 
   return (
     <section className="brands-section">
-      <h2 className="section-title">New arrivals</h2>
+      <h2 className="section-title">Latest Trends</h2>
       <div className="brand-grid">
         {brands.map((brand) => (
-          <Card 
+          <a
             key={brand.id}
-            type="brand"
-            image={brand.image}
-            title={brand.title}
-            subtitle={brand.subtitle}
-          />
+            href={brand.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="card-link-wrapper"
+            aria-label={`Go to article: ${brand.title}`}
+          >
+            <Card
+              type="brand"
+              image={brand.image}
+              title={brand.title}
+              subtitle=""
+              url={brand.url}
+            />
+          </a>
         ))}
       </div>
     </section>

@@ -1,23 +1,29 @@
 .brands-section {
-    margin-bottom: 48px;
-  }
-  
+  margin-bottom: 48px;
+}
+
+.brand-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
   .brand-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
-  
-  @media (max-width: 768px) {
-    .brand-grid {
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    }
+}
+
+@media (max-width: 480px) {
+  .brand-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
-  
-  @media (max-width: 480px) {
-    .brand-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-  
-  
+}
+
+.card-link-wrapper {
+  text-decoration: none;
+  color: inherit;
+}
+.card-link-wrapper:hover {
+  opacity: 0.9;
+}

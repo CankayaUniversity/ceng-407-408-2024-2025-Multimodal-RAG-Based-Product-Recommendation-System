@@ -7,7 +7,7 @@ load_dotenv()
 class TrendFetcher:
     def __init__(self,
                  query: str = "fashion",
-                 page_size: int = 3,
+                 page_size: int = 10,
                  sources: list = None):
         self.query = query
         self.page_size = page_size
