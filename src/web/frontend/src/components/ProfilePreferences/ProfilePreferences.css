@@ -1,0 +1,180 @@
+:root {
+    --primary-color: #e51a80;
+    --primary-hover: #c3166f;
+    --text-light: #ffffff;
+    --text-dark: #333333;
+  }
+  
+  /* Base */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", sans-serif;
+  }
+  
+  body {
+    background-color: #fff;
+    color: var(--text-dark);
+    line-height: 1.6;
+  }
+  
+  .container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .header {
+    margin-bottom: 24px;
+  }
+  
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    font-size: 16px;
+    color: var(--primary-color);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    transition: color 0.2s;
+    gap: 8px;
+  }
+  
+  .back-link:hover {
+    color: var(--primary-hover);
+  }
+  
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--text-dark);
+  }
+  
+  .description {
+    color: #666;
+    margin-bottom: 32px;
+    font-size: 16px;
+  }
+  
+  .category {
+    margin-bottom: 32px;
+  }
+  
+  h2 {
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 16px;
+    color: #333;
+  }
+  
+  .pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  
+  .pill {
+    padding: 8px 16px;
+    border-radius: 100px;
+    border: 1px solid #ddd;
+    background-color: white;
+    color: #555;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .pill:hover {
+    background-color: #f5f5f5;
+  }
+  
+  .pill.selected {
+    background-color: var(--primary-color);
+    color: var(--text-light);
+    border-color: var(--primary-color);
+  }
+  
+  .save-button-container {
+    margin: 40px 0 24px;
+  }
+  
+  #save-button {
+    padding: 12px 24px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  #save-button:hover {
+    background-color: var(--primary-hover);
+  }
+  
+  .summary {
+    margin-top: 32px;
+    padding: 16px;
+    background-color: #f8f8f8;
+    border-radius: 8px;
+  }
+  
+  .summary h3 {
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 12px;
+  }
+  
+  .selected-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .selected-pill {
+    padding: 4px 12px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 100px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .remove-preference {
+    margin-left: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.2);
+    font-size: 12px;
+  }
+  
+  .empty-message {
+    color: #888;
+    font-size: 14px;
+  }
+  
+  @media (max-width: 768px) {
+    .container {
+      padding: 16px;
+    }
+  
+    .pill {
+      padding: 6px 12px;
+      font-size: 13px;
+    }
+  
+    .pills {
+      gap: 8px;
+    }
+  }
+  
