@@ -18,7 +18,10 @@ function Header(): React.ReactElement {
   };
 
   const handleClickOutside = (event: MouseEvent) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+    if (
+      dropdownRef.current &&
+      !dropdownRef.current.contains(event.target as Node)
+    ) {
       setDropdownOpen(false);
     }
   };
@@ -30,39 +33,36 @@ function Header(): React.ReactElement {
 
   return (
     <header className="header">
-      <div className="logo" onClick={() => navigate("/")}>Fashion</div>
-
-      <div className="header-center">
-        <div className="search-container">
-          <div className="search-box">
-            <Search className="search-icon" size={16} />
-            <input type="text" placeholder="Search" className="search-input" />
-          </div>
-          <Camera className="camera-icon" size={20} />
-        </div>
+      <div className="logo" onClick={() => navigate("/")}>
+        Fashion
       </div>
+
+      <div className="header-center"></div>
 
       <div className="auth-buttons">
         {username ? (
           <div className="user-menu" ref={dropdownRef}>
             <div
               className="user-info"
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-            >
+              onClick={() => setDropdownOpen(!dropdownOpen)}>
               <User size={20} />
               <span className="user-username">{username}</span>
             </div>
             {dropdownOpen && (
               <div className="dropdown-menu">
-                <button onClick={() => navigate("/settings")}>Settings</button>
+                <button onClick={() => navigate("/profile")}>Profile</button>
                 <button onClick={handleLogout}>Logout</button>
               </div>
             )}
           </div>
         ) : (
           <>
-            <Link to="/login" className="auth-button">Sign In</Link>
-            <Link to="/register" className="auth-button">Sign Up</Link>
+            <Link to="/login" className="auth-button">
+              Sign In
+            </Link>
+            <Link to="/register" className="auth-button">
+              Sign Up
+            </Link>
           </>
         )}
       </div>

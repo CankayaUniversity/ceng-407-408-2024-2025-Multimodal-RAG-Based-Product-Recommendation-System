@@ -41,7 +41,7 @@ button.btn.btn-primary {
   display: flex;
   align-items: center;
   gap: 10px;
-  background-color: #e51a80;
+  background-color: rgb(229, 26, 128);
   color: white;
   padding: 12px 20px;
   border: none;
