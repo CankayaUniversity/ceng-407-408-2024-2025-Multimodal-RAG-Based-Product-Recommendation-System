@@ -93,10 +93,8 @@ class CategoryFreeSearch:
             except Exception as e:
                 print(f"Error searching collection {collection_name}: {str(e)}")
                 continue
-        
-        # Sort results (ascending order in score; lower score indicates higher similarity)
+      
         sorted_results = sorted(all_results, key=lambda x: x[0].score)
-        # Deduplicate results based on a unique id (using payload 'product_id' or result.id)
         final_results = []
         seen_ids = set()
         for result, col_name in sorted_results:

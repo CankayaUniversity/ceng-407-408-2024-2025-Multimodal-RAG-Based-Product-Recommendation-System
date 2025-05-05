@@ -1,7 +1,6 @@
 import React from "react";
 import Header from "../Header/Header";
 import Hero from "../Hero/Hero";
-import Categories from "../Categories/Categories";
 import Brands from "../Brands/Brands";
 import "./LandingPage.css";
 import { Bot } from "lucide-react";
@@ -21,8 +20,6 @@ function LandingPage(): React.ReactElement {
             Start chatting with AI for recommendations!
           </button>
         </div>
-
-        <Categories />
         <Brands />
       </main>
     </div>

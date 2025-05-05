@@ -1,16 +1,18 @@
 from utils import decode_base64_image
 from fashion_search import TextToImageSearch, ImageToImageSearch, CategoryFreeSearch
+from fashion_trend import TrendFetcher
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 from langchain_google_genai import GoogleGenerativeAI
 import os
 
 def rag_pipeline(query_text, category, image_base64=None, memory=None):
-    """
-    Retrieval-Augmented Generation (RAG) pipeline.
-    - If "No Category" is selected, it runs a category-free (multimodal) search across all collections.
-    - Otherwise, it performs category-specific searches using text and image modalities.
-    """
+    
+    trend_fetcher = TrendFetcher()
+    current_trends = trend_fetcher.get_current_trends()
+    image_urls = trend_fetcher.get_image_urls()
+    
+    
     valid_categories = [
         "clip_BASICS", "clip_BLAZERS", "clip_DRESSES_JUMPSUITS", "clip_JACKETS", "clip_KNITWEAR", 
         "clip_men_BLAZERS", "clip_men_HOODIES_SWEATSHIRTS", "clip_men_LINEN", "clip_men_OVERSHIRTS", 
@@ -84,11 +86,16 @@ def rag_pipeline(query_text, category, image_base64=None, memory=None):
         Based on the following product details:
         {context}
         
+        Current Fashion Trends Keywords:
+        {trends}
+        
         Provide a personalized recommendation with reasoning for a customer interested in '{query_text}'. 
         Use the uploaded image by user in your recommendation, the uploaded image is '{image_base64}'.
         In your response, please include the recommended product's image URL along with the product name and reasoning.
         Keep your response clear and short.
-        Make a list of keywords which are relevant to the product and the input query.
+        Make a list of keywords which are relevant to the product, trends and the input query.
+        Use the current fashion trends efficiently, mention how the recommended product matches current fashion trends. 
+        Provide a short explanation of the fashion trends with the product as well.
         
         If you think the context and the user's query are too irrelevant, do not recommend anything. Only answer the user's input query text.
         """
@@ -104,6 +111,7 @@ def rag_pipeline(query_text, category, image_base64=None, memory=None):
         context=context_str,
         query_text=query_text,
         image_base64=image_base64,
+        trends=current_trends,
         chat_history=memory
     )
     
