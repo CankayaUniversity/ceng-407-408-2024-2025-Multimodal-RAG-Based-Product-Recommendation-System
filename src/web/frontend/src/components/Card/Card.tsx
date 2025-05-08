@@ -7,6 +7,7 @@ interface CardProps {
   subtitle?: string;
   type: "category" | "brand";
   url?: string;
+  isLoading?: boolean;
 }
 
 function Card({
@@ -15,6 +16,7 @@ function Card({
   subtitle,
   type,
   url,
+  isLoading = false,
 }: CardProps): React.ReactElement {
   const handleClick = () => {
     if (url) {
@@ -24,23 +26,29 @@ function Card({
 
   return (
     <div
-      className={`card ${type}-card`}
+      className={`card ${type}-card ${isLoading ? 'loading' : ''}`}
       onClick={handleClick}
       style={{ cursor: url ? "pointer" : "default" }}
     >
-      <div className={`${type}-image-container`}>
-        <img
-          src={image || "https://placehold.co/300x300"}
-          alt={title}
-          onError={(e) => {
-            e.currentTarget.src = "https://placehold.co/300x300";
-          }}
-          className={`${type}-image`}
-        />
+      <div className={`${type}-image-container ${isLoading ? 'loading' : ''}`}>
+        {!isLoading ? (
+          <img
+            src={image || "https://placehold.co/300x300"}
+            alt={title}
+            onError={(e) => {
+              e.currentTarget.src = "https://placehold.co/300x300";
+            }}
+            className={`${type}-image`}
+          />
+        ) : null}
       </div>
       <div className={`${type}-info`}>
-        <p className={`${type}-title`}>{title}</p>
-        {subtitle && <p className={`${type}-subtitle`}>{subtitle}</p>}
+        {isLoading ? (
+          <div className={`${type}-title loading`}></div>
+        ) : (
+          <p className={`${type}-title`}>{title}</p>
+        )}
+        {subtitle && !isLoading && <p className={`${type}-subtitle`}>{subtitle}</p>}
       </div>
     </div>
   );
