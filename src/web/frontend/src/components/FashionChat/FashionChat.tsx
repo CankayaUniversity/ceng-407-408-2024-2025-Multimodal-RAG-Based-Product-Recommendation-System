@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Paperclip, Send } from "lucide-react";
+import { Paperclip, Send, Shirt } from "lucide-react";
 import Avatar from "../ui/Avatar";
 import Button from "../ui/Button";
 import Input from "../ui/Input";
@@ -33,6 +33,14 @@ const valid_categories = [
   "No Category",
 ];
 
+// Add this interface for try-on state
+interface TryOnState {
+  isOpen: boolean;
+  imageUrl: string | null;
+  productName: string | null;
+  userPhoto: string | null;
+}
+
 function FashionAIChat() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
@@ -42,9 +50,18 @@ function FashionAIChat() {
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] =
     useState<string>("No Category");
+  
+  // Updated Try-On state with userPhoto field
+  const [tryOnModal, setTryOnModal] = useState<TryOnState>({
+    isOpen: false,
+    imageUrl: null,
+    productName: null,
+    userPhoto: null
+  });
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const tryOnFileInputRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -199,6 +216,50 @@ function FashionAIChat() {
     fileInputRef.current?.click();
   };
 
+  // Handle Try On button click
+  const handleTryOn = (imageUrl: string, productName: string) => {
+    setTryOnModal({
+      isOpen: true,
+      imageUrl,
+      productName,
+      userPhoto: null
+    });
+  };
+
+  // Close try-on modal
+  const closeTryOnModal = () => {
+    setTryOnModal({
+      ...tryOnModal,
+      isOpen: false
+    });
+  };
+
+  // Handle user photo upload for try-on
+  const handleTryOnPhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0];
+    if (selectedFile) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setTryOnModal({
+          ...tryOnModal,
+          userPhoto: reader.result as string
+        });
+      };
+      reader.readAsDataURL(selectedFile);
+    }
+  };
+
+  // Trigger try-on photo upload
+  const triggerTryOnPhotoUpload = () => {
+    tryOnFileInputRef.current?.click();
+  };
+
+  // Adjust fit position - this could be expanded with more advanced positioning controls
+  const adjustFit = () => {
+    // This would be implemented with more advanced positioning logic
+    alert("Fit adjustment feature will be available soon!");
+  };
+
   return (
     <div className="fashion-chat-container">
       <Header />
@@ -223,14 +284,22 @@ function FashionAIChat() {
                   />
                 )}
 
-                {/* Bot-sent image URLs */}
-                {msg.imageUrls?.map((url, i) => (
-                  <img
-                    key={i}
-                    src={url}
-                    alt={`Bot suggestion ${i + 1}`}
-                    className="fashion-chat-image"
-                  />
+                {/* Bot-sent image URLs with Try On button */}
+                {msg.sender === "bot" && msg.imageUrls?.map((url, i) => (
+                  <div key={i} className="fashion-chat-product-container">
+                    <img
+                      src={url}
+                      alt={`Bot suggestion ${i + 1}`}
+                      className="fashion-chat-image"
+                    />
+                    <Button 
+                      onClick={() => handleTryOn(url, `Product ${i + 1}`)}
+                      className="fashion-chat-try-on-button"
+                    >
+                      <Shirt size={16} />
+                      Try On
+                    </Button>
+                  </div>
                 ))}
               </div>
             </div>
@@ -238,6 +307,70 @@ function FashionAIChat() {
           {loading && <p className="fashion-chat-loading">Thinking...</p>}
           <div ref={messagesEndRef} />
         </div>
+
+        {/* Try On Modal */}
+        {tryOnModal.isOpen && (
+          <div className="fashion-try-on-modal-overlay">
+            <div className="fashion-try-on-modal">
+              <div className="fashion-try-on-modal-header">
+                <h2>Virtual Try On</h2>
+                <button 
+                  className="fashion-try-on-close-button"
+                  onClick={closeTryOnModal}
+                >
+                  ×
+                </button>
+              </div>
+              <div className="fashion-try-on-modal-content">
+                <div className="fashion-try-on-product">
+                  <img 
+                    src={tryOnModal.imageUrl || ''} 
+                    alt={tryOnModal.productName || 'Product'} 
+                  />
+                  <p>{tryOnModal.productName}</p>
+                </div>
+                <div className="fashion-try-on-preview">
+                  <div className="fashion-try-on-avatar">
+                    {tryOnModal.userPhoto ? (
+                      <img 
+                        src={tryOnModal.userPhoto} 
+                        alt="User Avatar" 
+                        className="fashion-try-on-avatar-image" 
+                      />
+                    ) : (
+                      <img 
+                        src="/avatar-placeholder.png" 
+                        alt="Avatar" 
+                        className="fashion-try-on-avatar-image" 
+                      />
+                    )}
+                    {tryOnModal.imageUrl && (
+                      <img 
+                        src={tryOnModal.imageUrl} 
+                        alt="Overlaid product" 
+                        className="fashion-try-on-overlay-image" 
+                      />
+                    )}
+                  </div>
+                  <div className="fashion-try-on-controls">
+                    <Button 
+                      className="fashion-try-on-control-button"
+                      onClick={triggerTryOnPhotoUpload}
+                    >
+                      Upload Your Photo
+                    </Button>
+                    <Button 
+                      className="fashion-try-on-control-button"
+                      onClick={adjustFit}
+                    >
+                      Adjust Fit
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="fashion-chat-input-container">
           {/* Chat Input Row */}
@@ -294,12 +427,19 @@ function FashionAIChat() {
         </div>
       </main>
 
-      {/* Hidden File Input */}
+      {/* Hidden File Inputs */}
       <input
         ref={fileInputRef}
         type="file"
         accept="image/*"
         onChange={handleFileChange}
+        style={{ display: "none" }}
+      />
+      <input
+        ref={tryOnFileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleTryOnPhotoUpload}
         style={{ display: "none" }}
       />
     </div>
