@@ -23,10 +23,6 @@ class CategoryFreeSearch:
         self.fclip = FashionCLIP('fashion-clip')
     
     def _get_image_embedding(self, image_input: Union[str, Image.Image]) -> np.ndarray:
-        """
-        Retrieve and encode an image input to get its normalized embedding.
-        Accepts either a URL (str) or a PIL.Image.
-        """
         if isinstance(image_input, str):
             headers = {'User-Agent': 'Mozilla/5.0'}
             response = requests.get(image_input, headers=headers, timeout=10)
@@ -44,7 +40,6 @@ class CategoryFreeSearch:
         return img_emb if norm == 0 else img_emb / norm
     
     def _get_text_embedding(self, text: str) -> np.ndarray:
-        """Encode a text string and return its normalized embedding."""
         text_emb = self.fclip.encode_text([text], batch_size=1)[0]
         norm = np.linalg.norm(text_emb)
         return text_emb if norm == 0 else text_emb / norm

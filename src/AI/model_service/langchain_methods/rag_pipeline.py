@@ -73,7 +73,7 @@ def rag_pipeline(query_text, category, image_base64=None, memory=None):
     )
     
     
-    llm = GoogleGenerativeAI(model="gemini-1.5-pro", temperature=0.7, google_api_key=os.getenv("GOOGLE_API_KEY"))
+    llm = GoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.7, google_api_key=os.getenv("GOOGLE_API_KEY"))
     chain = LLMChain(llm=llm, prompt=prompt, memory=memory)
     response = chain.run(context=context_str, query_text=query_text, image_base64= image_base64, chat_history=memory)
     
