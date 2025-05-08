@@ -14,7 +14,7 @@ class TrendFetcher:
         self.sources = sources or [
             "vogue.com", "www.vogue.com",
             "elle.com", "harpersbazaar.com",
-            "fashionista.com", "wwd.com"
+            "cosmopolitan.com"
         ]
         self.api_key = os.getenv("NEWS_API_KEY")
 
