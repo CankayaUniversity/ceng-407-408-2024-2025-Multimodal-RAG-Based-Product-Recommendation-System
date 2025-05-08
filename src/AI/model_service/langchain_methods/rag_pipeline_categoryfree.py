@@ -24,19 +24,62 @@ def rag_pipeline(query_text, category, image_base64=None, memory=None):
         raise ValueError("Invalid category selected!")
     
     context_parts = []
+    original_query = query_text  # Store the original query for reference
     
     if category == "No Category":
         context_parts.append("Retrieved products based on category-free search:")
         try:
+            # Extract keywords from query to help guide the category-free search
+            query_type = "general"
+            query_keywords = []
+            common_keywords = {
+                "dress": "DRESSES_JUMPSUITS",
+                "shirt": "SHIRTS",
+                "t-shirt": "T-SHIRTS",
+                "blazer": "BLAZERS",
+                "jacket": "JACKETS",
+                "trouser": "TROUSERS",
+                "pant": "TROUSERS",
+                "men": "men",
+                "women": "women",
+                "knitwear": "KNITWEAR",
+                "shoe": "SHOES"
+            }
             
+            # Process query for better understanding
+            query_lower = query_text.lower()
+            for keyword, category_part in common_keywords.items():
+                if keyword in query_lower:
+                    query_keywords.append(category_part)
+                    
+            # Determine if we need to prioritize specific categories based on query
+            enhanced_query = query_text
+            if query_keywords:
+                # If we found relevant keywords, include them in the query for better search
+                enhanced_query = f"{query_text} {' '.join(query_keywords)}"
+                
             image_input = decode_base64_image(image_base64) if image_base64 else None
             searcher = CategoryFreeSearch() 
-            results = searcher.search(text=query_text, image=image_input, n_results=5)
+            
+            # Print what we're searching for
+            print(f"Searching for: {enhanced_query} (original: {query_text})")
+            
+            # Use enhanced query for search
+            results = searcher.search(text=enhanced_query, image=image_input, n_results=5)
+            
             if results:
+                # First, determine what categories were returned
+                found_categories = set([col_name for _, col_name in results])
+                context_parts.append(f"Found products across {len(found_categories)} different categories: {', '.join(found_categories)}")
+                
+                # Add the original query for context
+                context_parts.append(f"User's original search query: '{original_query}'")
+                
                 for result, col_name in results:
                     payload = result.payload
+                    # Add the category to the product info for better context
                     context_parts.append(
-                        f"Product: {payload.get('product_name', 'N/A')}, "
+                        f"Product: {payload.get('product_name', 'N/A')} (Category: {col_name.replace('clip_', '')}), "
                         f"Price: {payload.get('price', 'N/A')}, "
                         f"Image URL: {payload.get('image_url', '')}"
                     )
@@ -75,10 +118,8 @@ def rag_pipeline(query_text, category, image_base64=None, memory=None):
     
     prompt = PromptTemplate.from_template(
         """
-        You are a personal stylist, helping users to find their needed fashion products.
-        You are going to provide personalized fashion recommendations to users.
-        Therefore you should only answer fashion based queries, and make suggestions about fashion.
-        Do not provide fashion recommendations to queries other than fashion.
+        You are a personal stylist AI assistant, helping users find fashion products they're looking for.
+        You must be helpful even when the system doesn't have the exact items the user wants.
         
         Chat history:
         {chat_history}
@@ -89,15 +130,21 @@ def rag_pipeline(query_text, category, image_base64=None, memory=None):
         Current Fashion Trends Keywords:
         {trends}
         
-        Provide a personalized recommendation with reasoning for a customer interested in '{query_text}'. 
-        Use the uploaded image by user in your recommendation, the uploaded image is '{image_base64}'.
-        In your response, please include the recommended product's image URL along with the product name and reasoning.
-        Keep your response clear and short.
-        Make a list of keywords which are relevant to the product, trends and the input query.
-        Use the current fashion trends efficiently, mention how the recommended product matches current fashion trends. 
-        Provide a short explanation of the fashion trends with the product as well.
+        User query: '{query_text}'
         
-        If you think the context and the user's query are too irrelevant, do not recommend anything. Only answer the user's input query text.
+        IMPORTANT INSTRUCTIONS:
+        1. First, analyze what the user is asking for and what products are available.
+        2. If we have products that match the user's request (like pink dresses when they ask for a pink dress),
+           recommend those directly with enthusiasm.
+        3. If we don't have the exact match but have similar or related items, acknowledge this openly:
+           "While I don't have the exact [what user asked for], I can recommend some stylish alternatives..."
+        4. NEVER say you "cannot fulfill" the request or refuse to help. Always try to be helpful with what's available.
+        5. Include product image URLs in your recommendations.
+        6. Mention relevant fashion trends that relate to your recommendations.
+        7. Be conversational and friendly in your response.
+        
+        Respond with a personalized recommendation that addresses the user's query as best as possible
+        with the available products.
         """
     )
     

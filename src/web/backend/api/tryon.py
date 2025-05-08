@@ -98,16 +98,15 @@ def try_on():
                             f.write(avatar_binary)
                         
                         # Download the clothing image from URL
-                        clothing_response = requests.get(clothing_url)
-                        if clothing_response.status_code != 200:
-                            return jsonify({"error": f"Failed to download clothing image from URL: {clothing_url}"}), 400
-                        
-                        clothing_binary = clothing_response.content
-                        clothing_name = f"{uuid.uuid4()}.jpg"
-                        clothing_path = os.path.join(temp_dir, clothing_name)
-                        
-                        with open(clothing_path, 'wb') as f:
-                            f.write(clothing_binary)
+                        try:
+                            clothing_binary = download_image_from_url(clothing_url)
+                            clothing_name = f"{uuid.uuid4()}.jpg"
+                            clothing_path = os.path.join(temp_dir, clothing_name)
+                            
+                            with open(clothing_path, 'wb') as f:
+                                f.write(clothing_binary)
+                        except Exception as e:
+                            return jsonify({"error": f"Failed to download clothing image: {str(e)}"}), 400
                         
                         # Use the file-based API with both files
                         result = try_on_with_temp_files(avatar_path, clothing_path, api_key)
@@ -127,16 +126,15 @@ def try_on():
                     
                     try:
                         # Download the avatar image from URL
-                        avatar_response = requests.get(avatar_url)
-                        if avatar_response.status_code != 200:
-                            return jsonify({"error": f"Failed to download avatar image from URL: {avatar_url}"}), 400
-                        
-                        avatar_binary = avatar_response.content
-                        avatar_name = f"{uuid.uuid4()}.jpg"
-                        avatar_path = os.path.join(temp_dir, avatar_name)
-                        
-                        with open(avatar_path, 'wb') as f:
-                            f.write(avatar_binary)
+                        try:
+                            avatar_binary = download_image_from_url(avatar_url)
+                            avatar_name = f"{uuid.uuid4()}.jpg"
+                            avatar_path = os.path.join(temp_dir, avatar_name)
+                            
+                            with open(avatar_path, 'wb') as f:
+                                f.write(avatar_binary)
+                        except Exception as e:
+                            return jsonify({"error": f"Failed to download avatar image: {str(e)}"}), 400
                         
                         # Process clothing image from base64
                         clothing_data = re.sub('^data:image/.+;base64,', '', clothing_url)
@@ -180,6 +178,15 @@ def try_on_with_url(avatar_url, clothing_url, api_key):
     """
     url = "https://try-on-diffusion.p.rapidapi.com/try-on-url"
     
+    # Fix for Zara URLs with multiple slashes
+    # Normalize clothing_url if it's a Zara URL - they often have triple slashes that need special handling
+    if "zara.net" in clothing_url:
+        # Clean up the URL to ensure proper encoding
+        clothing_url = clothing_url.replace('///', '/')
+        if '://' in clothing_url:
+            protocol, rest = clothing_url.split('://', 1)
+            clothing_url = f"{protocol}://{rest.replace('//', '/')}"
+    
     payload = {
         "avatar_image_url": avatar_url,
         "clothing_image_url": clothing_url
@@ -188,36 +195,43 @@ def try_on_with_url(avatar_url, clothing_url, api_key):
     headers = {
         "x-rapidapi-key": api_key,
         "x-rapidapi-host": "try-on-diffusion.p.rapidapi.com",
-        "Content-Type": "application/x-www-form-urlencoded"
+        "Content-Type": "application/x-www-form-urlencoded",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
     }
 
-    response = requests.post(url, data=payload, headers=headers)
-    
-    # Check if response is successful
-    if response.status_code != 200:
-        error_message = f"RapidAPI Error: {response.status_code}"
-        try:
-            error_data = response.json()
-            error_message = f"{error_message} - {json.dumps(error_data)}"
-        except:
-            error_message = f"{error_message} - {response.text}"
-        
-        return {"error": error_message}
-    
-    # Try to parse JSON response
+    print(f"Sending request to RapidAPI with clothing URL: {clothing_url}")
+
     try:
-        result = response.json()
-        return result
-    except ValueError:
-        # Response is image data
-        img_data = response.content
-        # Convert image to base64 for easy transmission
-        base64_img = base64.b64encode(img_data).decode('utf-8')
-        return {
-            "success": True,
-            "image": base64_img,
-            "content_type": response.headers.get("Content-Type", "image/png")
-        }
+        response = requests.post(url, data=payload, headers=headers)
+        
+        # Check if response is successful
+        if response.status_code != 200:
+            error_message = f"RapidAPI Error: {response.status_code}"
+            try:
+                error_data = response.json()
+                error_message = f"{error_message} - {json.dumps(error_data)}"
+            except:
+                error_message = f"{error_message} - {response.text}"
+            
+            return {"error": error_message}
+        
+        # Try to parse JSON response
+        try:
+            result = response.json()
+            return result
+        except ValueError:
+            # Response is image data
+            img_data = response.content
+            # Convert image to base64 for easy transmission
+            base64_img = base64.b64encode(img_data).decode('utf-8')
+            return {
+                "success": True,
+                "image": base64_img,
+                "content_type": response.headers.get("Content-Type", "image/png")
+            }
+    except Exception as e:
+        print(f"Error in try_on_with_url: {str(e)}")
+        return {"error": f"Error accessing image URLs: {str(e)}"}
 
 def try_on_with_temp_files(avatar_path, clothing_path, api_key):
     """
@@ -297,4 +311,35 @@ def try_on_with_files(avatar_file, clothing_file, api_key):
         if avatar_path and os.path.exists(avatar_path):
             os.remove(avatar_path)
         if clothing_path and os.path.exists(clothing_path):
-            os.remove(clothing_path) 
+            os.remove(clothing_path)
+
+# For mixed format requests where clothing image is a URL, let's implement a helper function to download it first
+def download_image_from_url(image_url):
+    """Download an image from URL and return as binary data"""
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    }
+    
+    # Fix for Zara URLs with multiple slashes
+    if "zara.net" in image_url:
+        # Clean up the URL to ensure proper encoding
+        image_url = image_url.replace('///', '/')
+        if '://' in image_url:
+            protocol, rest = image_url.split('://', 1)
+            image_url = f"{protocol}://{rest.replace('//', '/')}"
+    
+    print(f"Downloading image from URL: {image_url}")
+    
+    try:
+        response = requests.get(image_url, headers=headers, timeout=30)
+        response.raise_for_status()  # Raise exception for 4XX/5XX responses
+        
+        # Check if the response is actually an image
+        content_type = response.headers.get('Content-Type', '')
+        if not content_type.startswith('image/'):
+            print(f"Warning: Content-Type is not an image: {content_type}")
+        
+        return response.content
+    except Exception as e:
+        print(f"Error downloading image from {image_url}: {str(e)}")
+        raise ValueError(f"Failed to download image from URL: {image_url}. Error: {str(e)}") 
