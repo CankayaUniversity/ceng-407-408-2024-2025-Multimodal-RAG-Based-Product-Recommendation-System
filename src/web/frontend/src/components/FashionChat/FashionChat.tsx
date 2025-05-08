@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Paperclip, Send, Shirt } from "lucide-react";
+import { Paperclip, Send, Shirt, Loader, X, RotateCcw } from "lucide-react";
 import Avatar from "../ui/Avatar";
 import Button from "../ui/Button";
 import Input from "../ui/Input";
@@ -39,6 +39,9 @@ interface TryOnState {
   imageUrl: string | null;
   productName: string | null;
   userPhoto: string | null;
+  resultImage: string | null;
+  isLoading: boolean;
+  error: string | null;
 }
 
 function FashionAIChat() {
@@ -51,12 +54,15 @@ function FashionAIChat() {
   const [selectedCategory, setSelectedCategory] =
     useState<string>("No Category");
   
-  // Updated Try-On state with userPhoto field
+  // Updated Try-On state with resultImage, isLoading, and error fields
   const [tryOnModal, setTryOnModal] = useState<TryOnState>({
     isOpen: false,
     imageUrl: null,
     productName: null,
-    userPhoto: null
+    userPhoto: null,
+    resultImage: null,
+    isLoading: false,
+    error: null
   });
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -254,7 +260,10 @@ function FashionAIChat() {
       isOpen: true,
       imageUrl,
       productName,
-      userPhoto: null
+      userPhoto: null,
+      resultImage: null,
+      isLoading: false,
+      error: null
     });
   };
 
@@ -274,7 +283,9 @@ function FashionAIChat() {
       reader.onloadend = () => {
         setTryOnModal({
           ...tryOnModal,
-          userPhoto: reader.result as string
+          userPhoto: reader.result as string,
+          resultImage: null, // Clear previous result
+          error: null // Clear any previous errors
         });
       };
       reader.readAsDataURL(selectedFile);
@@ -286,10 +297,70 @@ function FashionAIChat() {
     tryOnFileInputRef.current?.click();
   };
 
-  // Adjust fit position - this could be expanded with more advanced positioning controls
-  const adjustFit = () => {
-    // This would be implemented with more advanced positioning logic
-    alert("Fit adjustment feature will be available soon!");
+  // Process try-on with uploaded image
+  const processTryOn = async () => {
+    if (!tryOnModal.userPhoto || !tryOnModal.imageUrl) {
+      setTryOnModal({
+        ...tryOnModal,
+        error: "Both your photo and a clothing item are required"
+      });
+      return;
+    }
+    
+    setTryOnModal({
+      ...tryOnModal,
+      isLoading: true,
+      error: null
+    });
+    
+    try {
+      // Create a FormData object to send the image URLs
+      const formData = new FormData();
+      formData.append('avatar_image_url', tryOnModal.userPhoto);
+      formData.append('clothing_image_url', tryOnModal.imageUrl);
+      
+      // Send request to our backend API
+      const response = await fetch('http://localhost:3001/api/tryon', {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to process try-on request');
+      }
+      
+      const result = await response.json();
+      
+      if (result.error) {
+        throw new Error(result.error);
+      }
+      
+      // Update state with the result image
+      setTryOnModal({
+        ...tryOnModal,
+        resultImage: `data:${result.content_type};base64,${result.image}`,
+        isLoading: false
+      });
+      
+    } catch (error) {
+      console.error('Try-on processing error:', error);
+      setTryOnModal({
+        ...tryOnModal,
+        error: error instanceof Error ? error.message : 'An unknown error occurred',
+        isLoading: false
+      });
+    }
+  };
+
+  // Reset try-on process
+  const resetTryOn = () => {
+    setTryOnModal({
+      ...tryOnModal,
+      userPhoto: null,
+      resultImage: null,
+      error: null
+    });
   };
 
   return (
@@ -377,7 +448,7 @@ function FashionAIChat() {
                   className="fashion-try-on-close-button"
                   onClick={closeTryOnModal}
                 >
-                  ×
+                  <X size={20} />
                 </button>
               </div>
               <div className="fashion-try-on-modal-content">
@@ -389,44 +460,75 @@ function FashionAIChat() {
                   <p>{tryOnModal.productName}</p>
                 </div>
                 <div className="fashion-try-on-preview">
-                  <div className="fashion-try-on-avatar">
-                    {tryOnModal.userPhoto ? (
+                  {tryOnModal.resultImage ? (
+                    <div className="fashion-try-on-result">
                       <img 
-                        src={tryOnModal.userPhoto} 
-                        alt="User Avatar" 
-                        className="fashion-try-on-avatar-image" 
+                        src={tryOnModal.resultImage}
+                        alt="Try-on result" 
+                        className="fashion-try-on-result-image"
                       />
-                    ) : (
-                      <div className="fashion-try-on-upload-prompt">
-                        <div className="fashion-try-on-upload-icon">
-                          <Paperclip size={24} />
-                        </div>
-                        <p>Upload your photo to see how this would look on you</p>
+                      <div className="fashion-try-on-controls">
+                        <Button 
+                          className="fashion-try-on-control-button"
+                          onClick={resetTryOn}
+                        >
+                          <RotateCcw size={18} />
+                          Try Different Photo
+                        </Button>
                       </div>
-                    )}
-                    {tryOnModal.imageUrl && tryOnModal.userPhoto && (
-                      <img 
-                        src={tryOnModal.imageUrl} 
-                        alt="Overlaid product" 
-                        className="fashion-try-on-overlay-image" 
-                      />
-                    )}
-                  </div>
-                  <div className="fashion-try-on-controls">
-                    <Button 
-                      className="fashion-try-on-control-button"
-                      onClick={triggerTryOnPhotoUpload}
-                    >
-                      Upload Your Photo
-                    </Button>
-                    <Button 
-                      className="fashion-try-on-control-button"
-                      onClick={adjustFit}
-                      disabled={!tryOnModal.userPhoto}
-                    >
-                      Adjust Fit
-                    </Button>
-                  </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="fashion-try-on-avatar">
+                        {tryOnModal.userPhoto ? (
+                          <img 
+                            src={tryOnModal.userPhoto} 
+                            alt="User Avatar" 
+                            className="fashion-try-on-avatar-image" 
+                          />
+                        ) : (
+                          <div className="fashion-try-on-upload-prompt">
+                            <div className="fashion-try-on-upload-icon">
+                              <Paperclip size={24} />
+                            </div>
+                            <p>Upload your photo to see how this would look on you</p>
+                          </div>
+                        )}
+                      </div>
+                      <div className="fashion-try-on-controls">
+                        <Button 
+                          className="fashion-try-on-control-button"
+                          onClick={triggerTryOnPhotoUpload}
+                        >
+                          Upload Your Photo
+                        </Button>
+                        <Button 
+                          className="fashion-try-on-control-button try-on-process-button"
+                          onClick={processTryOn}
+                          disabled={!tryOnModal.userPhoto || tryOnModal.isLoading}
+                        >
+                          {tryOnModal.isLoading ? (
+                            <>
+                              <Loader size={18} className="spinning" />
+                              Processing...
+                            </>
+                          ) : (
+                            <>
+                              <Shirt size={18} />
+                              Generate Try-On
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </>
+                  )}
+                  
+                  {/* Error message */}
+                  {tryOnModal.error && (
+                    <div className="fashion-try-on-error">
+                      <p>{tryOnModal.error}</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

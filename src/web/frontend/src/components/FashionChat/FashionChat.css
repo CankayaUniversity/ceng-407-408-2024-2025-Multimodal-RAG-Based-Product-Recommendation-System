@@ -592,13 +592,7 @@
 }
 
 .fashion-try-on-overlay-image {
-  position: absolute;
-  max-width: 70%;
-  max-height: 70%;
-  object-fit: contain;
-  opacity: 0.9;
-  transition: var(--transition-normal);
-  pointer-events: none;
+  display: none;
 }
 
 .fashion-try-on-controls {
@@ -768,4 +762,51 @@
 .fashion-try-on-control-button:disabled:hover {
   transform: none;
   box-shadow: none;
+}
+
+/* Try-on result styling */
+.fashion-try-on-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.fashion-try-on-result-image {
+  max-width: 100%;
+  max-height: 400px;
+  object-fit: contain;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  border: 2px solid var(--primary-color);
+}
+
+/* Try on spinning loader */
+.spinning {
+  animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Try on error message */
+.fashion-try-on-error {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-md);
+  color: rgb(185, 28, 28);
+  font-size: 14px;
+  text-align: center;
+}
+
+.try-on-process-button {
+  background-color: var(--accent-color);
+}
+
+.try-on-process-button:hover:not(:disabled) {
+  background-color: var(--accent-hover);
 }
