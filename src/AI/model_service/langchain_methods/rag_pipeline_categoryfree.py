@@ -102,7 +102,7 @@ def rag_pipeline(query_text, category, image_base64=None, memory=None):
     )
     
     llm = GoogleGenerativeAI(
-        model="gemini-2.5-flash-preview-04-17",
+        model="gemini-2.0-flash",
         temperature=0.7,
         google_api_key=os.getenv("GOOGLE_API_KEY")
     )
