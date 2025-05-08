@@ -1,40 +1,57 @@
 .brands-section {
-  margin-bottom: 48px;
+  margin-bottom: 60px;
+  position: relative;
+  scroll-margin-top: 80px;
 }
 
 .brand-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 24px;
+  margin-top: 30px;
 }
 
 @media (max-width: 768px) {
   .brand-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
   }
 }
 
 @media (max-width: 480px) {
   .brand-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
   }
 }
 
 .card-link-wrapper {
   text-decoration: none;
   color: inherit;
+  transition: var(--transition-normal);
+  display: block;
+  transform: translateY(0);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
+
 .card-link-wrapper:hover {
-  opacity: 0.9;
+  opacity: 1;
+  transform: translateY(-5px);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.12);
 }
 
 /* Placeholder Styles */
 .card-placeholder {
   position: relative;
   overflow: hidden;
-  border-radius: 8px;
-  background-color: #f5f5f5;
+  border-radius: var(--radius-lg);
+  background-color: #f0f2f5;
   height: 100%;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  min-height: 260px;
+  border: 1px solid var(--border-color);
 }
 
 .loading-shimmer {
@@ -45,7 +62,7 @@
   height: 100%;
   background: linear-gradient(90deg, 
     rgba(255,255,255,0) 0%, 
-    rgba(255,255,255,0.2) 50%, 
+    rgba(255,255,255,0.3) 50%, 
     rgba(255,255,255,0) 100%);
   animation: shimmer 1.5s infinite;
 }
@@ -61,12 +78,17 @@
 
 .no-trends-message {
   grid-column: 1 / -1;
-  padding: 20px;
+  padding: 30px;
   text-align: center;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  color: #666;
+  background-color: #f5f7fa;
+  border-radius: var(--radius-lg);
+  color: var(--text-dark);
   font-style: italic;
-  margin-top: 10px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  margin-top: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  font-size: 16px;
+  line-height: 1.6;
+  border: 1px dashed var(--border-color);
 }
+
+/* Section title and description styling moved to LandingPage.css */

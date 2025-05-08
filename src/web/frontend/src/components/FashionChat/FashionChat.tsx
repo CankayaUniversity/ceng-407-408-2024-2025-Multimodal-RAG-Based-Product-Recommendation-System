@@ -62,6 +62,7 @@ function FashionAIChat() {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const tryOnFileInputRef = useRef<HTMLInputElement | null>(null);
+  const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -84,6 +85,18 @@ function FashionAIChat() {
         if (!response.ok) {
           localStorage.removeItem("token");
           navigate("/login", { state: { from: location.pathname } });
+        } else {
+          // Add welcome message when the chat loads
+          const username = localStorage.getItem("email")?.split("@")[0] || "there";
+          setMessages([
+            {
+              text: `Hello ${username}! I'm your fashion assistant. How can I help with your style needs today? You can ask for outfit suggestions, search for specific products, or upload a photo to find similar items.`,
+              sender: "bot",
+              imageBase64: undefined,
+              category: undefined,
+              imageUrls: []
+            }
+          ]);
         }
       } catch (error) {
         console.error("Token check error:", error);
@@ -92,6 +105,11 @@ function FashionAIChat() {
     };
 
     checkToken();
+    
+    // Focus the input field on load
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 500);
   }, []);
 
   useEffect(() => {
@@ -216,6 +234,20 @@ function FashionAIChat() {
     fileInputRef.current?.click();
   };
 
+  // Clear the chat history
+  const clearChat = () => {
+    const username = localStorage.getItem("email")?.split("@")[0] || "there";
+    setMessages([
+      {
+        text: `Hello ${username}! I'm your fashion assistant. How can I help with your style needs today?`,
+        sender: "bot",
+        imageBase64: undefined,
+        category: undefined,
+        imageUrls: []
+      }
+    ]);
+  };
+
   // Handle Try On button click
   const handleTryOn = (imageUrl: string, productName: string) => {
     setTryOnModal({
@@ -265,12 +297,29 @@ function FashionAIChat() {
       <Header />
       {/* Main Content */}
       <main className="fashion-chat-main">
-        <h1 className="fashion-chat-title">Chat with me</h1>
+        <div className="fashion-chat-header-controls">
+          <h1 className="fashion-chat-title">Fashion Assistant</h1>
+          <button onClick={clearChat} className="fashion-chat-clear-button">
+            Clear Chat
+          </button>
+        </div>
 
         {/* Chat Messages */}
         <div className="fashion-chat-messages">
+          {messages.length === 0 && !loading && (
+            <div className="fashion-chat-empty-state">
+              <div className="fashion-chat-empty-icon">💬</div>
+              <p>Send a message to start your fashion conversation</p>
+            </div>
+          )}
+        
           {messages.map((msg, index) => (
             <div key={index} className={`fashion-chat-message ${msg.sender}`}>
+              {msg.sender === "bot" && (
+                <div className="fashion-chat-avatar">
+                  <div className="fashion-chat-avatar-icon">AI</div>
+                </div>
+              )}
               <div className="fashion-chat-message-bubble">
                 {/* Message Text */}
                 {msg.text && <p>{msg.text}</p>}
@@ -285,26 +334,36 @@ function FashionAIChat() {
                 )}
 
                 {/* Bot-sent image URLs with Try On button */}
-                {msg.sender === "bot" && msg.imageUrls?.map((url, i) => (
-                  <div key={i} className="fashion-chat-product-container">
-                    <img
-                      src={url}
-                      alt={`Bot suggestion ${i + 1}`}
-                      className="fashion-chat-image"
-                    />
-                    <Button 
-                      onClick={() => handleTryOn(url, `Product ${i + 1}`)}
-                      className="fashion-chat-try-on-button"
-                    >
-                      <Shirt size={16} />
-                      Try On
-                    </Button>
+                {msg.sender === "bot" && msg.imageUrls && msg.imageUrls.length > 0 && (
+                  <div className="fashion-chat-product-grid">
+                    {msg.imageUrls.map((url, i) => (
+                      <div key={i} className="fashion-chat-product-container">
+                        <img
+                          src={url}
+                          alt={`Bot suggestion ${i + 1}`}
+                          className="fashion-chat-image"
+                          loading="lazy"
+                        />
+                        <Button 
+                          onClick={() => handleTryOn(url, `Product ${i + 1}`)}
+                          className="fashion-chat-try-on-button"
+                        >
+                          <Shirt size={16} />
+                          Try On
+                        </Button>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
+              {msg.sender === "user" && (
+                <div className="fashion-chat-avatar user">
+                  <div className="fashion-chat-avatar-icon">You</div>
+                </div>
+              )}
             </div>
           ))}
-          {loading && <p className="fashion-chat-loading">Thinking...</p>}
+          {loading && <div className="fashion-chat-loading">Thinking</div>}
           <div ref={messagesEndRef} />
         </div>
 
@@ -338,13 +397,14 @@ function FashionAIChat() {
                         className="fashion-try-on-avatar-image" 
                       />
                     ) : (
-                      <img 
-                        src="/avatar-placeholder.png" 
-                        alt="Avatar" 
-                        className="fashion-try-on-avatar-image" 
-                      />
+                      <div className="fashion-try-on-upload-prompt">
+                        <div className="fashion-try-on-upload-icon">
+                          <Paperclip size={24} />
+                        </div>
+                        <p>Upload your photo to see how this would look on you</p>
+                      </div>
                     )}
-                    {tryOnModal.imageUrl && (
+                    {tryOnModal.imageUrl && tryOnModal.userPhoto && (
                       <img 
                         src={tryOnModal.imageUrl} 
                         alt="Overlaid product" 
@@ -362,6 +422,7 @@ function FashionAIChat() {
                     <Button 
                       className="fashion-try-on-control-button"
                       onClick={adjustFit}
+                      disabled={!tryOnModal.userPhoto}
                     >
                       Adjust Fit
                     </Button>
@@ -380,7 +441,7 @@ function FashionAIChat() {
               className="fashion-chat-category-select"
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}>
-              <option value="">Select</option>
+              <option value="">Select Category</option>
               {valid_categories.map((category) => (
                 <option key={category} value={category}>
                   {category.replace("clip_", "").replace("_", " ")}
@@ -390,6 +451,7 @@ function FashionAIChat() {
 
             {/* Growing Textarea */}
             <TextareaAutosize
+              ref={inputRef}
               className="fashion-chat-input"
               placeholder="Type a message..."
               value={message}
@@ -420,7 +482,7 @@ function FashionAIChat() {
                 onClick={handleMessage}
                 disabled={loading || (!message.trim() && !image)}
                 className="fashion-chat-send-button">
-                <Send size={25} className="fashion-chat-send-icon" />
+                <Send size={20} className="fashion-chat-send-icon" />
               </Button>
             </div>
           </div>
