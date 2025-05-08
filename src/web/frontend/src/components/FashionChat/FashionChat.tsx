@@ -256,23 +256,57 @@ function FashionAIChat() {
 
   // Handle Try On button click
   const handleTryOn = (imageUrl: string, productName: string) => {
+    // Ensure URL is properly encoded, especially for Zara URLs with multiple slashes
+    let processedUrl = imageUrl;
+    
+    // Reset the modal state completely
     setTryOnModal({
       isOpen: true,
-      imageUrl,
+      imageUrl: processedUrl,
       productName,
       userPhoto: null,
       resultImage: null,
       isLoading: false,
       error: null
     });
+    
+    // Reset the file input
+    if (tryOnFileInputRef.current) {
+      tryOnFileInputRef.current.value = '';
+    }
   };
 
-  // Close try-on modal
-  const closeTryOnModal = () => {
+  // Reset try-on process
+  const resetTryOn = () => {
     setTryOnModal({
       ...tryOnModal,
-      isOpen: false
+      userPhoto: null,
+      resultImage: null,
+      error: null
     });
+    
+    // Reset the file input element so the same file can be selected again
+    if (tryOnFileInputRef.current) {
+      tryOnFileInputRef.current.value = '';
+    }
+  };
+
+  // Close try-on modal with full reset
+  const closeTryOnModal = () => {
+    setTryOnModal({
+      isOpen: false,
+      imageUrl: null,
+      productName: null,
+      userPhoto: null,
+      resultImage: null,
+      isLoading: false,
+      error: null
+    });
+    
+    // Reset the file input element when closing the modal
+    if (tryOnFileInputRef.current) {
+      tryOnFileInputRef.current.value = '';
+    }
   };
 
   // Handle user photo upload for try-on
@@ -294,6 +328,10 @@ function FashionAIChat() {
 
   // Trigger try-on photo upload
   const triggerTryOnPhotoUpload = () => {
+    // Reset the file input value first, so the same file can be selected again
+    if (tryOnFileInputRef.current) {
+      tryOnFileInputRef.current.value = '';
+    }
     tryOnFileInputRef.current?.click();
   };
 
@@ -314,32 +352,49 @@ function FashionAIChat() {
     });
     
     try {
+      console.log("Starting try-on process");
+      
       // Create a FormData object to send the image URLs
       const formData = new FormData();
       formData.append('avatar_image_url', tryOnModal.userPhoto);
       formData.append('clothing_image_url', tryOnModal.imageUrl);
       
-      // Send request to our backend API
+      console.log("Sending request to try-on API");
+      
+      // Send request to our backend API with a timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+      
       const response = await fetch('http://localhost:3001/api/tryon', {
         method: 'POST',
-        body: formData
+        body: formData,
+        signal: controller.signal
       });
       
+      clearTimeout(timeoutId);
+      
       if (!response.ok) {
+        console.error("Try-on API error:", response.status, response.statusText);
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to process try-on request');
+        throw new Error(errorData.error || `Failed to process try-on request (Status: ${response.status})`);
       }
       
       const result = await response.json();
+      
+      console.log("Try-on response received:", result);
       
       if (result.error) {
         throw new Error(result.error);
       }
       
+      if (!result.image) {
+        throw new Error("No image was returned from the server");
+      }
+      
       // Update state with the result image
       setTryOnModal({
         ...tryOnModal,
-        resultImage: `data:${result.content_type};base64,${result.image}`,
+        resultImage: `data:${result.content_type || 'image/png'};base64,${result.image}`,
         isLoading: false
       });
       
@@ -347,20 +402,21 @@ function FashionAIChat() {
       console.error('Try-on processing error:', error);
       setTryOnModal({
         ...tryOnModal,
-        error: error instanceof Error ? error.message : 'An unknown error occurred',
+        error: error instanceof Error ? error.message : 'An unknown error occurred during processing',
         isLoading: false
       });
+      
+      // Add a retry option if it was a timeout or network error
+      if (
+        error instanceof DOMException || 
+        (error && typeof error === 'object' && 'name' in error && error.name === 'AbortError')
+      ) {
+        setTryOnModal(prev => ({
+          ...prev, 
+          error: 'Request timed out. The server may be busy. Please try again.'
+        }));
+      }
     }
-  };
-
-  // Reset try-on process
-  const resetTryOn = () => {
-    setTryOnModal({
-      ...tryOnModal,
-      userPhoto: null,
-      resultImage: null,
-      error: null
-    });
   };
 
   return (
@@ -500,7 +556,7 @@ function FashionAIChat() {
                           className="fashion-try-on-control-button"
                           onClick={triggerTryOnPhotoUpload}
                         >
-                          Upload Your Photo
+                          {tryOnModal.userPhoto ? 'Choose Different Photo' : 'Upload Your Photo'}
                         </Button>
                         <Button 
                           className="fashion-try-on-control-button try-on-process-button"
