@@ -8,18 +8,13 @@ def register_routes():
     from . import login       # Auth-related endpoints
     from . import register    # Auth-related endpoints
     from . import test
-    # Remove non-existent imports
-    # from . import product
-    # from . import recommend
-    # from . import search
+    # Removed unused features
     from . import tryon
     from . import chat
-    from . import trends
     from . import keywords
     from . import profile
-    from . import social
-    from . import outfits
     from . import gemini
+    from . import trends      # Fashion trends endpoints
     
     # Return the blueprint after all routes are registered
     return api_blueprint

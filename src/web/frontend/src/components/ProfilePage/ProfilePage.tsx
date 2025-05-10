@@ -127,36 +127,9 @@ const ProfilePage: React.FC = () => {
           </section>
 
           <section className="profile-section">
-            <h2>View your past searches</h2>
-            <p>We'll show you the products you've searched for.</p>
-            <Link to="/profile/past-searches" className="see-all-link">See all →</Link>
-          </section>
-
-          <section className="profile-section">
             <h2>Manage your preferences</h2>
             <p>Want to see more of the things you love? Tell us what you're interested in</p>
             <Link to="/profile/preferences" className="manage-preferences-link">Manage preferences →</Link>
-          </section>
-
-          <section className="profile-section">
-            <h2>Last Viewed Products</h2>
-            <div className="last-viewed-products">
-              <div className="product-card">
-                <img src="https://via.placeholder.com/200x250" alt="Product" />
-                <p className="product-title">The Perfect White Shirt</p>
-                <p className="product-viewed-date">Viewed in 25.05.2024</p>
-              </div>
-              <div className="product-card">
-                <img src="https://via.placeholder.com/200x250" alt="Product" />
-                <p className="product-title">Summer Party Looks</p>
-                <p className="product-viewed-date">Viewed in 25.05.2024</p>
-              </div>
-              <div className="product-card">
-                <img src="https://via.placeholder.com/200x250" alt="Product" />
-                <p className="product-title">Best Sunscreen</p>
-                <p className="product-viewed-date">Viewed in 25.05.2024</p>
-              </div>
-            </div>
           </section>
         </main>
       </div>

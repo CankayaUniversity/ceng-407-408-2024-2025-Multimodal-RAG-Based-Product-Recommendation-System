@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from api import register_routes  # Import register_routes instead of api_blueprint
 from auth.auth import auth_bp
+from api.trends import trends_bp  # Import the trends blueprint
 from dotenv import load_dotenv
 import os
 
@@ -21,6 +22,7 @@ os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'profile_photos'), exist_o
 api_blueprint = register_routes()
 app.register_blueprint(api_blueprint, url_prefix='/api')
 app.register_blueprint(auth_bp, url_prefix='/auth')
+app.register_blueprint(trends_bp, url_prefix='/api')  # Register the trends blueprint
 
 # Serve static files from uploads directory
 @app.route('/uploads/<path:filename>')
