@@ -61,6 +61,7 @@ const Login = () => {
         localStorage.setItem("token", data.token);
         localStorage.setItem("email", data.email);
         localStorage.setItem("username", data.username);
+        localStorage.setItem("userId", data.userId);
 
         setSuccess(true);
         setTimeout(() => {
