@@ -24,14 +24,15 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     const email = localStorage.getItem("email");
+    const username = localStorage.getItem("username");
     
     if (!token) {
       navigate("/login", { state: { from: "/dashboard" } });
       return;
     }
     
-    if (email) {
-      const name = email.split("@")[0];
+    if (username) {
+      const name = username;
       setUsername(name.charAt(0).toUpperCase() + name.slice(1));
     }
   }, [navigate]);

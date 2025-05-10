@@ -5,7 +5,9 @@ import Header from "../Header/Header";
 import axios from "axios";
 
 interface PhotoResponse {
-  photo_url: string;
+  photo_data?: string;
+  content_type?: string;
+  photo_url?: string;
   message?: string;
 }
 
@@ -23,12 +25,12 @@ const ProfilePage: React.FC = () => {
 
   const fetchProfilePhoto = async () => {
     try {
-      const response = await axios.get<PhotoResponse>('http://localhost:3001/api/get-profile-photo', {
-        headers: {
-          'X-User-Email': userEmail
-        }
-      });
-      if (response.data.photo_url) {
+      const response = await axios.get<PhotoResponse>(`http://localhost:3001/api/get-profile-photo?email=${userEmail}`);
+      if (response.data.photo_data && response.data.content_type) {
+        // Construct data URL from base64 data and content type
+        const dataUrl = `data:${response.data.content_type};base64,${response.data.photo_data}`;
+        setProfilePhoto(dataUrl);
+      } else if (response.data.photo_url) {
         setProfilePhoto(response.data.photo_url);
       }
     } catch (error: any) {
@@ -66,9 +68,9 @@ const ProfilePage: React.FC = () => {
         },
       });
       console.log('Upload response:', response.data);
-      if (response.data.photo_url) {
-        setProfilePhoto(response.data.photo_url);
-      }
+      
+      // Fetch the updated photo after successful upload
+      await fetchProfilePhoto();
     } catch (error: any) {
       console.error('Error uploading photo:', error);
       if (error.response) {

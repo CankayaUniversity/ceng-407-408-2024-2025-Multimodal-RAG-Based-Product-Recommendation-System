@@ -2,8 +2,11 @@ from flask import request, jsonify, current_app, Blueprint
 from . import api_blueprint
 import jwt
 import os
-from models.user_profile import StyleProfile, BodyMeasurements, WardrobeItem, UserInteraction
+from models.user_profile import StyleProfile, BodyMeasurements, WardrobeItem, UserInteraction, UserPhoto
 from datetime import datetime
+import uuid
+import tempfile
+import base64
 
 # Create a dedicated profile blueprint
 profile_bp = Blueprint('profile', __name__)
@@ -490,4 +493,83 @@ def get_interactions():
 
 @api_blueprint.route('/profile/interactions', methods=['GET'])
 def api_get_interactions():
-    return get_interactions() 
+    return get_interactions()
+
+# Profile Photo Endpoints
+@profile_bp.route('/upload-photo', methods=['POST'])
+def upload_profile_photo():
+    """Upload a profile photo for the user"""
+    user_email = request.headers.get('X-User-Email')
+    if not user_email:
+        return jsonify({"error": "User email required"}), 400
+
+    if 'photo' not in request.files:
+        return jsonify({"error": "No photo provided"}), 400
+
+    photo = request.files['photo']
+    if photo.filename == '':
+        return jsonify({"error": "No photo selected"}), 400
+
+    try:
+        # Read the photo data and encode as base64
+        photo_data = photo.read()
+        content_type = photo.content_type
+        
+        # Convert to base64
+        photo_base64 = base64.b64encode(photo_data).decode('utf-8')
+        
+        # Create or update user photo in database
+        user_photo = UserPhoto.get_by_user_id(user_email)
+        if user_photo:
+            user_photo.photo_data = photo_base64
+            user_photo.content_type = content_type
+        else:
+            user_photo = UserPhoto(
+                user_id=user_email,
+                photo_data=photo_base64,
+                content_type=content_type
+            )
+        
+        user_photo.save()
+
+        return jsonify({
+            "message": "Profile photo uploaded successfully",
+            "photo_url": f"/api/get-profile-photo?email={user_email}"
+        })
+
+    except Exception as e:
+        current_app.logger.error(f"Error uploading profile photo: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@profile_bp.route('/get-profile-photo', methods=['GET'])
+def get_profile_photo():
+    """Get the user's profile photo"""
+    user_email = request.args.get('email')
+    if not user_email:
+        return jsonify({"error": "User email required"}), 400
+
+    try:
+        user_photo = UserPhoto.get_by_user_id(user_email)
+        if not user_photo:
+            return jsonify({
+                "photo_url": "https://via.placeholder.com/150"  # Default photo
+            })
+
+        # Return the photo data and content type
+        return jsonify({
+            "photo_data": user_photo.photo_data,
+            "content_type": user_photo.content_type
+        })
+
+    except Exception as e:
+        current_app.logger.error(f"Error getting profile photo: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+# Register the endpoints with the main blueprint
+@api_blueprint.route('/upload-photo', methods=['POST'])
+def api_upload_profile_photo():
+    return upload_profile_photo()
+
+@api_blueprint.route('/get-profile-photo', methods=['GET'])
+def api_get_profile_photo():
+    return get_profile_photo() 
