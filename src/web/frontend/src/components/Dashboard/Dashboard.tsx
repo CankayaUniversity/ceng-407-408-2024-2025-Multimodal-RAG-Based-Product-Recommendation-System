@@ -54,36 +54,8 @@ const Dashboard: React.FC = () => {
       path: "/profile/preferences",
       color: "#8b5cf6"
     },
-    {
-      id: "profile",
-      title: "Profile Settings",
-      description: "Update your measurements and preferences",
-      icon: <UserCircle size={32} />,
-      path: "/profile",
-      color: "#10b981"
-    }
   ];
 
-  const recentActivities = [
-    {
-      id: "activity-1",
-      type: "added-item",
-      message: "Added a new item to your wardrobe",
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString() // 2 hours ago
-    },
-    {
-      id: "activity-2",
-      type: "consultation",
-      message: "Completed a style analysis",
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString() // 1 day ago
-    },
-    {
-      id: "activity-3",
-      type: "chat",
-      message: "Had a conversation with Fashion Assistant",
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString() // 2 days ago
-    }
-  ];
 
   // Format date for display
   const formatDate = (dateString: string) => {
@@ -174,45 +146,12 @@ const Dashboard: React.FC = () => {
               <MessageCircle size={20} />
               Fashion Chat
             </button>
-            <button 
-              className="quick-action-button"
-              onClick={() => navigate("/profile/settings")}
-            >
-              <Settings size={20} />
-              Settings
-            </button>
-          </div>
-        </section>
-
-        <section className="dashboard-recent-activity">
-          <h2>Recent Activity</h2>
-          <div className="activity-timeline">
-            {recentActivities.map(activity => (
-              <div className="activity-item" key={activity.id}>
-                <div className="activity-time">
-                  {formatDate(activity.timestamp)}
-                </div>
-                <div className="activity-content">
-                  <p>{activity.message}</p>
-                </div>
-              </div>
-            ))}
           </div>
         </section>
 
         <section className="dashboard-suggested">
           <h2>Suggested For You</h2>
           <div className="suggested-content">
-            <div className="suggested-card">
-              <h3>Complete Your Profile</h3>
-              <p>Update your body measurements for better recommendations</p>
-              <button 
-                className="suggested-action"
-                onClick={() => navigate("/profile/measurements")}
-              >
-                Update Measurements
-              </button>
-            </div>
             <div className="suggested-card">
               <h3>Style Analysis</h3>
               <p>Discover your personal style and color palette</p>
