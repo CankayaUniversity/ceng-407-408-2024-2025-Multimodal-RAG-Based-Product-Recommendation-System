@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { Message } from "../../types/message";
 import { sendMessageToBackend } from "../../api/ChatService";
 import TextareaAutosize from "react-textarea-autosize";
+import ReactMarkdown from 'react-markdown';
 
 const valid_categories = [
   "clip_BASICS",
@@ -89,6 +90,7 @@ function FashionAIChat() {
         });
 
         if (!response.ok) {
+          console.error("Token validation failed:", response.status);
           localStorage.removeItem("token");
           navigate("/login", { state: { from: location.pathname } });
         } else {
@@ -103,6 +105,45 @@ function FashionAIChat() {
               imageUrls: []
             }
           ]);
+          
+          // Set up periodic token check (every 5 minutes)
+          const tokenCheckInterval = setInterval(() => {
+            const currentToken = localStorage.getItem("token");
+            if (currentToken) {
+              fetch("http://localhost:3001/auth/check", {
+                method: "GET",
+                headers: {
+                  Authorization: `Bearer ${currentToken}`,
+                },
+              }).then(response => {
+                if (!response.ok) {
+                  console.warn("Token expired during session");
+                  clearInterval(tokenCheckInterval);
+                  localStorage.removeItem("token");
+                  setMessages(prev => [
+                    ...prev,
+                    {
+                      text: "Your session has expired. Please log in again to continue.",
+                      sender: "bot",
+                      imageBase64: undefined,
+                      category: undefined,
+                    }
+                  ]);
+                  // Give user a moment to read the message before redirecting
+                  setTimeout(() => {
+                    navigate("/login", { state: { from: location.pathname } });
+                  }, 3000);
+                }
+              }).catch(err => {
+                console.error("Token check error:", err);
+              });
+            } else {
+              clearInterval(tokenCheckInterval);
+            }
+          }, 5 * 60 * 1000); // Check every 5 minutes
+          
+          // Clear interval on component unmount
+          return () => clearInterval(tokenCheckInterval);
         }
       } catch (error) {
         console.error("Token check error:", error);
@@ -174,7 +215,31 @@ function FashionAIChat() {
 
     try {
       const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("You must be logged in to use the chat service");
+      }
+      
       const email = localStorage.getItem("email");
+      
+      // First check if the token is still valid
+      try {
+        const tokenCheckResponse = await fetch("http://localhost:3001/auth/check", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        
+        if (!tokenCheckResponse.ok) {
+          // Token is invalid, remove it and notify user
+          localStorage.removeItem("token");
+          throw new Error("Your session has expired. Please log in again.");
+        }
+      } catch (tokenError) {
+        console.error("Token validation error:", tokenError);
+        throw new Error("Authentication error. Please log in again.");
+      }
+      
       const botResponseText = await sendMessageToBackend(
         message,
         image,
@@ -182,6 +247,7 @@ function FashionAIChat() {
         selectedCategory,
         email
       );
+      
       // Extract image URLs from the bot's response text
       // Extract image URLs from the response text
       const extractedImageUrls = extractImageUrls(botResponseText);
@@ -212,10 +278,27 @@ function FashionAIChat() {
       ]);
     } catch (error) {
       console.error("Error communicating with backend:", error);
+      
+      // Handle different error scenarios with user-friendly messages
+      let errorMessage = "Error: Unable to reach the server.";
+      
+      if (error instanceof Error) {
+        if (error.message.includes("session has expired") || 
+            error.message.includes("log in again")) {
+          errorMessage = error.message;
+          // Redirect to login page after a short delay
+          setTimeout(() => {
+            navigate("/login", { state: { from: location.pathname } });
+          }, 3000);
+        } else {
+          errorMessage = `Error: ${error.message}`;
+        }
+      }
+      
       setMessages((prev) => [
         ...prev,
         {
-          text: "Error: Unable to reach the server.",
+          text: errorMessage,
           sender: "bot",
           imageBase64: undefined,
           category: undefined, // Error message doesn't need a category
@@ -448,8 +531,37 @@ function FashionAIChat() {
                 </div>
               )}
               <div className="fashion-chat-message-bubble">
-                {/* Message Text */}
-                {msg.text && <p>{msg.text}</p>}
+                {/* Message Text - Updated to use Markdown for bot messages */}
+                {msg.text && msg.sender === "bot" ? (
+                  <div className="markdown-content">
+                    <ReactMarkdown
+                      children={msg.text}
+                      components={{
+                        strong: ({ node, ...props }) => {
+                          // Special handling for Reasoning: and Product: labels
+                          const content = props.children?.toString() || '';
+                          if (content.startsWith('Reasoning:') || content.startsWith('Product:')) {
+                            return <strong className="section-header" {...props} />;
+                          }
+                          return <strong {...props} />;
+                        },
+                        p: ({ node, ...props }) => {
+                          // Apply special styling to paragraphs containing section headers
+                          const content = props.children?.toString() || '';
+                          if (
+                            content.includes('Reasoning:') || 
+                            content.includes('Product:')
+                          ) {
+                            return <p className="section-paragraph" {...props} />;
+                          }
+                          return <p {...props} />;
+                        }
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <p>{msg.text}</p>
+                )}
 
                 {/* User-uploaded image*/}
                 {msg.imageBase64 && (
