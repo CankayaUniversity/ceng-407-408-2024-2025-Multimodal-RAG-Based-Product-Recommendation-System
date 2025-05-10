@@ -14,6 +14,8 @@
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^6.4.8",
     "@mui/material": "^6.4.8",
+    "@types/axios": "^0.9.36",
+    "axios": "^1.9.0",
     "framer-motion": "^12.9.1",
     "lucide-react": "^0.477.0",
     "react": "^19.0.0",

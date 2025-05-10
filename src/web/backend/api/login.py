@@ -2,6 +2,7 @@ from flask import request, jsonify
 from . import api_blueprint
 from services import DatabaseService
 from auth import create_token
+from bson import ObjectId
 
 database_service = DatabaseService()
 
@@ -19,6 +20,12 @@ def login():
     
     if user:
         token = create_token(email=email)
-        return jsonify({"message": "Login successful", "email": email, "username":user["username"], "token":token }), 200
+        return jsonify({
+            "message": "Login successful",
+            "email": email,
+            "username": user["username"],
+            "userId": str(user["_id"]),
+            "token": token
+        }), 200
     else:
         return jsonify({"error": "Invalid credentials"}), 401
