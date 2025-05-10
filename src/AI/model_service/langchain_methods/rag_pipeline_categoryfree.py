@@ -150,6 +150,8 @@ def rag_pipeline(query_text, category, image_base64=None, memory=None):
         
         Respond with a personalized recommendation that addresses the user's query as best as possible
         with the available products.
+        
+        If you think the context and the user's query are too irrelevant, do not recommend anything. Only answer the user's input query text.
         """
     )
     
