@@ -118,6 +118,11 @@ def rag_pipeline(query_text, category, image_base64=None, memory=None):
     
     prompt = PromptTemplate.from_template(
         """
+        You are a personal stylist, helping users to find their needed fashion products.
+        You are going to provide personalized fashion recommendations to users.
+        Therefore you should only answer fashion based queries, and make suggestions about fashion.
+        Do not provide fashion recommendations to queries other than fashion.
+        
         You are a personal stylist AI assistant, helping users find fashion products they're looking for.
         You must be helpful even when the system doesn't have the exact items the user wants.
         
