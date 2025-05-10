@@ -57,6 +57,22 @@ class CategoryFreeSearch:
         boosted_emb = (1-boost_factor) * np.array(base_embedding) + boost_factor * category_emb
         norm = np.linalg.norm(boosted_emb)
         return boosted_emb.tolist() if norm == 0 else (boosted_emb / norm).tolist()
+    
+    def _boost_embedding_for_color(self, base_embedding, color_name, boost_factor=0.4):
+        color_text = f"a {color_name.lower()} color item"
+        color_emb = self._get_text_embedding(color_text)
+        
+        boosted_emb = (1-boost_factor) * np.array(base_embedding) + boost_factor * color_emb
+        norm = np.linalg.norm(boosted_emb)
+        return boosted_emb.tolist() if norm == 0 else (boosted_emb / norm).tolist()
+
+    def _boost_embedding_for_outfit(self, base_embedding, outfit_type, boost_factor=0.4):
+        outfit_text = f"a complete {outfit_type.lower()} outfit"
+        outfit_emb = self._get_text_embedding(outfit_text)
+        
+        boosted_emb = (1-boost_factor) * np.array(base_embedding) + boost_factor * outfit_emb
+        norm = np.linalg.norm(boosted_emb)
+        return boosted_emb.tolist() if norm == 0 else (boosted_emb / norm).tolist()
 
     def search(self, text: Optional[str] = None, image: Optional[Union[str, Image.Image]] = None, n_results: int = 5) -> Optional[List[Tuple[models.ScoredPoint, str]]]:
         """
@@ -95,6 +111,8 @@ class CategoryFreeSearch:
         # Extract query keywords to improve search relevance
         query_keywords = []
         specific_categories = []
+        found_colors = []
+        outfit_types = []
         
         if text:
             # Basic tokenization and keyword extraction
@@ -184,18 +202,57 @@ class CategoryFreeSearch:
                             specific_categories.append(col)
             
             # Handle colors - extract if present
-            color_keywords = [
-                "red", "blue", "green", "yellow", "black", "white", "pink", "purple", 
-                "orange", "brown", "gray", "grey", "navy", "teal", "beige", "cream"
+            enhanced_color_keywords = {
+                "red": ["red", "burgundy", "maroon", "crimson", "scarlet"],
+                "blue": ["blue", "navy", "azure", "turquoise", "teal", "cyan"],
+                "green": ["green", "olive", "lime", "emerald", "sage", "mint"],
+                "yellow": ["yellow", "gold", "amber", "mustard"],
+                "black": ["black", "jet black", "onyx"],
+                "white": ["white", "ivory", "cream", "off-white"],
+                "pink": ["pink", "rose", "fuchsia", "magenta"],
+                "purple": ["purple", "violet", "lavender", "lilac", "mauve"],
+                "orange": ["orange", "coral", "peach", "tangerine"],
+                "brown": ["brown", "tan", "beige", "khaki", "camel", "chocolate"],
+                "gray": ["gray", "grey", "silver", "charcoal"],
+                "multicolor": ["multicolor", "colorful", "patterned", "floral", "striped", "checkered"]
+            }
+            
+            for color, variations in enhanced_color_keywords.items():
+                if any(variation in query_lower for variation in variations):
+                    found_colors.append(color)
+                    query_keywords.append(color)
+                    print(f"Detected color: {color}")
+            
+            outfit_phrases = [
+                "outfit", "look", "ensemble", "attire", "full look", 
+                "complete outfit", "entire outfit", "full outfit"
             ]
             
-            found_colors = [color for color in color_keywords if color in query_lower]
-            if found_colors:
-                query_keywords.extend(found_colors)
-                print(f"Detected colors in query: {found_colors}")
+            outfit_types_dict = {
+                "casual": ["casual", "everyday", "relaxed", "weekend", "comfy"],
+                "formal": ["formal", "business", "professional", "office", "work", "elegant"],
+                "sporty": ["sporty", "athletic", "workout", "gym", "active", "sport"],
+                "party": ["party", "evening", "nightout", "club", "cocktail"],
+                "beach": ["beach", "summer", "vacation", "resort"],
+                "winter": ["winter", "cold", "snow", "holiday", "christmas"],
+                "wedding": ["wedding", "bridal", "ceremony", "special occasion"]
+            }
+            
+            is_outfit_search = any(phrase in query_lower for phrase in outfit_phrases)
+            
+            if is_outfit_search:
+                print("Detected OUTFIT search request")
+                query_keywords.append("outfit")
+                
+                for outfit_type, keywords in outfit_types_dict.items():
+                    if any(keyword in query_lower for keyword in keywords):
+                        outfit_types.append(outfit_type)
+                        print(f"Detected outfit type: {outfit_type}")
         
         print(f"Detected keywords: {query_keywords}")
         print(f"Mapped to specific categories: {specific_categories}")
+        print(f"Detected colors: {found_colors}")
+        print(f"Outfit types: {outfit_types}")
         
         # Set up prioritized collections - start with specific categories if found
         prioritized_collections = []
@@ -228,6 +285,9 @@ class CategoryFreeSearch:
             results_per_specific = 0
             results_per_general = max(2, min(n_results // len(prioritized_collections), 3))
         
+        if found_colors and not specific_categories:
+            results_per_general = 3
+        
         all_results = []
         
         # Search across all collections with priority given to more relevant ones
@@ -245,7 +305,17 @@ class CategoryFreeSearch:
                 query_vector = base_query_vector
                 if collection_name in specific_categories:
                     query_vector = self._boost_embedding_for_category(base_query_vector, collection_name)
-                    print(f"Applied boosting for {collection_name}")
+                    print(f"Applied category boosting for {collection_name}")
+                
+                # Apply color boosting if colors were found but no specific categories
+                if found_colors and not specific_categories and len(found_colors) == 1:
+                    query_vector = self._boost_embedding_for_color(query_vector, found_colors[0])
+                    print(f"Applied color boosting for {found_colors[0]}")
+                
+                # Apply outfit type boosting if this is an outfit search
+                if "outfit" in query_keywords and outfit_types and len(outfit_types) == 1:
+                    query_vector = self._boost_embedding_for_outfit(query_vector, outfit_types[0])
+                    print(f"Applied outfit boosting for {outfit_types[0]}")
                 
                 results = self.client.search(
                     collection_name=collection_name,

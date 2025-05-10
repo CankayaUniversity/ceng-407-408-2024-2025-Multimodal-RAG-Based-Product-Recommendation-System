@@ -71,7 +71,8 @@ button.btn.btn-primary {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  background: linear-gradient(135deg, #ff6b6b, #8b5cf6, #4cc9f0);
+  background-size: 200% 200%;
   color: white;
   padding: 16px 28px;
   border: none;
@@ -83,6 +84,19 @@ button.btn.btn-primary {
   box-shadow: var(--shadow-lg);
   position: relative;
   overflow: hidden;
+  animation: gradientShift 3s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 button.btn.btn-primary::before {
@@ -92,13 +106,14 @@ button.btn.btn-primary::before {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
   transition: 0.5s;
 }
 
 button.btn.btn-primary:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  filter: brightness(1.1);
 }
 
 button.btn.btn-primary:hover::before {
@@ -106,7 +121,7 @@ button.btn.btn-primary:hover::before {
 }
 
 .bot-icon {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.3);
   padding: 8px;
   border-radius: var(--radius-full);
   box-shadow: var(--shadow-sm);

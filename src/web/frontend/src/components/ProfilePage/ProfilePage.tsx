@@ -96,7 +96,6 @@ const ProfilePage: React.FC = () => {
           <nav>
             <ul>
               <li><Link to="/profile">Profile</Link></li>
-              <li><Link to="/profile/favorites">Favorites</Link></li>
               <li><Link to="/profile/past-recommendations">Past Recommendations</Link></li>
               <li><Link to="/profile/preferences">Preferences</Link></li>
             </ul>
@@ -123,12 +122,6 @@ const ProfilePage: React.FC = () => {
               style={{ display: 'none' }}
             />
             {isUploading && <p className="upload-status">Uploading...</p>}
-          </section>
-
-          <section className="profile-section">
-            <h2>Save your favorites</h2>
-            <p>Any products you favorite will appear here</p>
-            <Link to="/profile/favorites" className="see-all-link">See all →</Link>
           </section>
 
           <section className="profile-section">

@@ -1,8 +1,9 @@
 from flask import request, jsonify
 from . import api_blueprint
 from services import DatabaseService
-from auth import create_token
-from bson import ObjectId
+
+from auth.auth import create_token
+
 
 database_service = DatabaseService()
 

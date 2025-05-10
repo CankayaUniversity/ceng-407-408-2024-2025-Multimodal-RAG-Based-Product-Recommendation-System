@@ -221,6 +221,7 @@
   padding: 14px 18px;
   max-width: 100%;
   line-height: 1.5;
+  overflow: hidden;
 }
 
 .fashion-chat-message-bubble p {
@@ -707,10 +708,12 @@
 /* Product grid styling */
 .fashion-chat-product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 12px;
-  margin-top: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
   width: 100%;
+  border-top: 1px solid var(--border-color);
+  padding-top: 16px;
 }
 
 @media (max-width: 600px) {
@@ -809,4 +812,117 @@
 
 .try-on-process-button:hover:not(:disabled) {
   background-color: var(--accent-hover);
+}
+
+/* Enhanced styles for the markdown content */
+.markdown-content {
+  line-height: 1.6;
+  padding: 8px;
+}
+
+.markdown-content p {
+  margin: 0 0 12px 0;
+}
+
+.markdown-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* Style product names with more emphasis */
+.markdown-content a,
+.markdown-content strong {
+  font-weight: 700;
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.markdown-content a:hover {
+  text-decoration: underline;
+  opacity: 0.9;
+}
+
+/* Make product names in blue stand out */
+.markdown-content strong {
+  color: var(--primary-color);
+}
+
+/* Special styling for section headers */
+.markdown-content .section-header {
+  display: block;
+  margin-top: 16px;
+  margin-bottom: 8px;
+  font-weight: 700;
+  color: var(--primary-color);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 4px;
+}
+
+/* Style paragraphs containing section headers */
+.markdown-content .section-paragraph {
+  margin-top: 16px;
+}
+
+/* Organize the main product grid */
+.fashion-chat-product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+  width: 100%;
+  border-top: 1px solid var(--border-color);
+  padding-top: 16px;
+}
+
+.fashion-chat-product-container {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background-color: white;
+  border: 1px solid var(--border-color);
+}
+
+.fashion-chat-product-container:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+}
+
+.fashion-chat-image {
+  width: 100%;
+  aspect-ratio: 3/4;
+  object-fit: cover;
+  border-radius: 8px 8px 0 0;
+}
+
+/* Add clean dividers between different sections */
+.markdown-content hr {
+  margin: 16px 0;
+  border: 0;
+  height: 1px;
+  background-color: var(--border-color);
+}
+
+/* Style heading sections with tabs */
+.markdown-content h3 {
+  font-size: 1.1em;
+  margin-top: 16px;
+  margin-bottom: 10px;
+  color: var(--text-dark);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 6px;
+  padding-left: 8px;
+  border-left: 3px solid var(--primary-color);
+}
+
+/* Clean introduction formatting */
+.markdown-content p:first-child {
+  font-weight: 500;
+}
+
+/* Style for product keywords */
+.markdown-content a {
+  color: var(--primary-color);
+  font-weight: 700;
+  text-decoration: none;
 }
