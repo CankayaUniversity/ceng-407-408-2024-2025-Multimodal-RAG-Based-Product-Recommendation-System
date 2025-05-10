@@ -50,7 +50,7 @@ const Dashboard: React.FC = () => {
       title: "Style Analysis",
       description: "Discover your style preferences and color palette",
       icon: <Scissors size={32} />,
-      path: "/style-analysis",
+      path: "/profile/preferences",
       color: "#8b5cf6"
     },
     {
@@ -217,7 +217,7 @@ const Dashboard: React.FC = () => {
               <p>Discover your personal style and color palette</p>
               <button 
                 className="suggested-action"
-                onClick={() => navigate("/style-analysis")}
+                onClick={() => navigate("/profile/preferences")}
               >
                 Start Analysis
               </button>
