@@ -1,10 +1,12 @@
-
-from flask import request, jsonify, current_app
+from flask import request, jsonify, current_app, Blueprint
 from . import api_blueprint
 import jwt
 import os
 from models.user_profile import StyleProfile, BodyMeasurements, WardrobeItem, UserInteraction
 from datetime import datetime
+
+# Create a dedicated profile blueprint
+profile_bp = Blueprint('profile', __name__)
 
 # Helper function to verify token
 def verify_token(token):
@@ -17,7 +19,7 @@ def verify_token(token):
         return None
 
 # Style Profile Endpoints
-@api_blueprint.route('/profile/style', methods=['GET'])
+@profile_bp.route('/profile/style', methods=['GET'])
 def get_style_profile():
     """Get the user's style profile"""
     auth_header = request.headers.get('Authorization')
@@ -40,7 +42,11 @@ def get_style_profile():
         "data": profile.to_dict()
     })
 
-@api_blueprint.route('/profile/style', methods=['POST', 'PUT'])
+@api_blueprint.route('/profile/style', methods=['GET'])
+def api_get_style_profile():
+    return get_style_profile()
+
+@profile_bp.route('/profile/style', methods=['POST', 'PUT'])
 def create_update_style_profile():
     """Create or update user's style profile"""
     auth_header = request.headers.get('Authorization')
@@ -58,38 +64,46 @@ def create_update_style_profile():
     if not data:
         return jsonify({"error": "No data provided"}), 400
     
-    # Get existing profile or create new one
-    profile = StyleProfile.get_by_user_id(user_id)
-    if not profile:
-        profile = StyleProfile(user_id=user_id)
+    # Check if profile exists
+    existing_profile = StyleProfile.get_by_user_id(user_id)
     
-    # Update fields from request
-    if 'preferred_colors' in data:
-        profile.preferred_colors = data['preferred_colors']
-    if 'preferred_styles' in data:
-        profile.preferred_styles = data['preferred_styles']
-    if 'preferred_categories' in data:
-        profile.preferred_categories = data['preferred_categories']
-    if 'disliked_colors' in data:
-        profile.disliked_colors = data['disliked_colors']
-    if 'disliked_styles' in data:
-        profile.disliked_styles = data['disliked_styles']
-    if 'occasion_preferences' in data:
-        profile.occasion_preferences = data['occasion_preferences']
-    if 'season_preferences' in data:
-        profile.season_preferences = data['season_preferences']
-    if 'budget_range' in data:
-        profile.budget_range = data['budget_range']
-    
-    profile.save()
-    
-    return jsonify({
-        "message": "Style profile updated successfully",
-        "data": profile.to_dict()
-    })
+    if existing_profile:
+        # Update existing profile
+        for key, value in data.items():
+            if hasattr(existing_profile, key):
+                setattr(existing_profile, key, value)
+        
+        existing_profile.save()
+        return jsonify({
+            "message": "Style profile updated successfully",
+            "data": existing_profile.to_dict()
+        })
+    else:
+        # Create new profile
+        profile = StyleProfile(
+            user_id=user_id,
+            preferred_colors=data.get('preferred_colors', []),
+            preferred_styles=data.get('preferred_styles', []),
+            preferred_categories=data.get('preferred_categories', []),
+            disliked_colors=data.get('disliked_colors', []),
+            disliked_styles=data.get('disliked_styles', []),
+            occasion_preferences=data.get('occasion_preferences', {}),
+            season_preferences=data.get('season_preferences', {}),
+            budget_range=data.get('budget_range', {})
+        )
+        
+        profile.save()
+        return jsonify({
+            "message": "Style profile created successfully",
+            "data": profile.to_dict()
+        })
+
+@api_blueprint.route('/profile/style', methods=['POST', 'PUT'])
+def api_create_update_style_profile():
+    return create_update_style_profile()
 
 # Body Measurements Endpoints
-@api_blueprint.route('/profile/measurements', methods=['GET'])
+@profile_bp.route('/profile/measurements', methods=['GET'])
 def get_body_measurements():
     """Get the user's body measurements"""
     auth_header = request.headers.get('Authorization')
@@ -112,7 +126,11 @@ def get_body_measurements():
         "data": measurements.to_dict()
     })
 
-@api_blueprint.route('/profile/measurements', methods=['POST', 'PUT'])
+@api_blueprint.route('/profile/measurements', methods=['GET'])
+def api_get_body_measurements():
+    return get_body_measurements()
+
+@profile_bp.route('/profile/measurements', methods=['POST', 'PUT'])
 def create_update_body_measurements():
     """Create or update user's body measurements"""
     auth_header = request.headers.get('Authorization')
@@ -166,8 +184,12 @@ def create_update_body_measurements():
         "data": measurements.to_dict()
     })
 
+@api_blueprint.route('/profile/measurements', methods=['POST', 'PUT'])
+def api_create_update_body_measurements():
+    return create_update_body_measurements()
+
 # Body Measurements Detection Endpoint
-@api_blueprint.route('/profile/measurements/detect', methods=['POST'])
+@profile_bp.route('/profile/measurements/detect', methods=['POST'])
 def detect_body_measurements():
     """Use computer vision to estimate body measurements from a photo"""
     auth_header = request.headers.get('Authorization')
@@ -225,7 +247,7 @@ def detect_body_measurements():
         return jsonify({"error": str(e)}), 500
 
 # User Wardrobe Endpoints
-@api_blueprint.route('/profile/wardrobe', methods=['GET'])
+@profile_bp.route('/profile/wardrobe', methods=['GET'])
 def get_wardrobe():
     """Get the user's wardrobe items"""
     auth_header = request.headers.get('Authorization')
@@ -246,7 +268,11 @@ def get_wardrobe():
         "data": [item.to_dict() for item in items]
     })
 
-@api_blueprint.route('/profile/wardrobe', methods=['POST'])
+@api_blueprint.route('/profile/wardrobe', methods=['GET'])
+def api_get_wardrobe():
+    return get_wardrobe()
+
+@profile_bp.route('/profile/wardrobe', methods=['POST'])
 def add_wardrobe_item():
     """Add an item to user's wardrobe"""
     auth_header = request.headers.get('Authorization')
@@ -291,7 +317,11 @@ def add_wardrobe_item():
         "data": item.to_dict()
     })
 
-@api_blueprint.route('/profile/wardrobe/<item_id>', methods=['DELETE'])
+@api_blueprint.route('/profile/wardrobe', methods=['POST'])
+def api_add_wardrobe_item():
+    return add_wardrobe_item()
+
+@profile_bp.route('/profile/wardrobe/<item_id>', methods=['DELETE'])
 def delete_wardrobe_item(item_id):
     """Delete an item from user's wardrobe"""
     auth_header = request.headers.get('Authorization')
@@ -321,7 +351,7 @@ def delete_wardrobe_item(item_id):
     })
 
 # Seasonal Wardrobe Planning
-@api_blueprint.route('/profile/wardrobe/seasonal-plan', methods=['GET'])
+@profile_bp.route('/profile/wardrobe/seasonal-plan', methods=['GET'])
 def get_seasonal_plan():
     """Get seasonal wardrobe plan recommendations"""
     auth_header = request.headers.get('Authorization')
@@ -388,7 +418,7 @@ def get_seasonal_plan():
     })
 
 # User Interaction Tracking
-@api_blueprint.route('/profile/interactions', methods=['POST'])
+@profile_bp.route('/profile/interactions', methods=['POST'])
 def track_interaction():
     """Track user interaction with a product"""
     auth_header = request.headers.get('Authorization')
@@ -426,7 +456,11 @@ def track_interaction():
         "message": "User interaction tracked successfully"
     })
 
-@api_blueprint.route('/profile/interactions', methods=['GET'])
+@api_blueprint.route('/profile/interactions', methods=['POST'])
+def api_track_interaction():
+    return track_interaction()
+
+@profile_bp.route('/profile/interactions', methods=['GET'])
 def get_interactions():
     """Get user's product interactions"""
     auth_header = request.headers.get('Authorization')
@@ -452,4 +486,8 @@ def get_interactions():
     return jsonify({
         "message": "User interactions retrieved successfully",
         "data": [interaction.to_dict() for interaction in interactions]
-    }) 
+    })
+
+@api_blueprint.route('/profile/interactions', methods=['GET'])
+def api_get_interactions():
+    return get_interactions() 
