@@ -98,7 +98,6 @@ const ProfilePage: React.FC = () => {
           <nav>
             <ul>
               <li><Link to="/profile">Profile</Link></li>
-              <li><Link to="/profile/past-recommendations">Past Recommendations</Link></li>
               <li><Link to="/profile/preferences">Preferences</Link></li>
             </ul>
           </nav>
