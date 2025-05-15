@@ -66,6 +66,10 @@ function FashionAIChat() {
     error: null
   });
 
+  // Add new state for tracking image load status
+  const [imageLoadStatus, setImageLoadStatus] = useState<Record<string, boolean>>({});
+  const imageRefs = useRef<Record<string, HTMLImageElement | null>>({});
+
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const tryOnFileInputRef = useRef<HTMLInputElement | null>(null);
@@ -176,20 +180,61 @@ function FashionAIChat() {
       reader.readAsDataURL(selectedFile);
     }
   };
+
+  // Utility to clean up image URLs
+  const cleanImageUrl = (url: string): string => {
+    // Handle Zara URLs specifically
+    if (url.includes('zara.net')) {
+      // Replace multiple consecutive slashes with a single slash
+      let cleanedUrl = url.replace(/([^:]\/)\/+/g, '$1');
+      
+      // Fix protocol handling
+      if (cleanedUrl.includes('://')) {
+        const [protocol, rest] = cleanedUrl.split('://', 2);
+        cleanedUrl = `${protocol}://${rest.replace(/\/+/g, '/')}`;
+      }
+      
+      return cleanedUrl;
+    }
+    return url;
+  };
+
   // Utility to extract image URLs (full or partial)
   const extractImageUrls = (text: string): string[] => {
     const urls: string[] = [];
 
-    // 1. Extract full image URLs that match the Zara image pattern
-    const fullUrlRegex =
-      /(https:\/\/static\.zara\.net\/photos\/[\/\w\d\-\._]+(\?ts=[0-9]+)?)\b/gi;
+    // Log the incoming text for debugging
+    console.log('Extracting URLs from text:', text);
 
-    // Match all full URLs in the text
-    const matches = [...text.matchAll(fullUrlRegex)];
-    matches.forEach((match) => urls.push(match[0]));
+    // 1. Extract full image URLs that match the Zara image pattern
+    const zaraUrlRegex = /(https:\/\/static\.zara\.net\/photos\/[\/\w\d\-\._]+(\?ts=[0-9]+)?)\b/gi;
+    
+    // 2. Extract any other image URLs
+    const generalUrlRegex = /(https?:\/\/[^\s]+(?:\.(?:png|jpe?g|gif|webp))(\?[^\s]*)?)\b/gi;
+
+    // Match all Zara URLs in the text
+    const zaraMatches = [...text.matchAll(zaraUrlRegex)];
+    zaraMatches.forEach((match) => {
+      const cleanedUrl = cleanImageUrl(match[0]);
+      urls.push(cleanedUrl);
+    });
+
+    // Match all other image URLs in the text
+    const generalMatches = [...text.matchAll(generalUrlRegex)];
+    generalMatches.forEach((match) => {
+      const cleanedUrl = cleanImageUrl(match[0]);
+      // Only add if it's not already in the urls array
+      if (!urls.includes(cleanedUrl)) {
+        urls.push(cleanedUrl);
+      }
+    });
+
+    // Log the extracted URLs for debugging
+    console.log('Extracted URLs:', urls);
 
     return urls;
   };
+
   const removeImageUrlLine = (text: string): string => {
     // This regex matches any line that contains "**Image URL:**" (ignoring case)
     // and removes it along with the newline.
@@ -206,7 +251,7 @@ function FashionAIChat() {
         text: message,
         sender: "user",
         imageBase64: image,
-        category: selectedCategory, // Send selected category directly
+        category: selectedCategory,
       },
     ]);
 
@@ -231,7 +276,6 @@ function FashionAIChat() {
         });
         
         if (!tokenCheckResponse.ok) {
-          // Token is invalid, remove it and notify user
           localStorage.removeItem("token");
           throw new Error("Your session has expired. Please log in again.");
         }
@@ -240,6 +284,7 @@ function FashionAIChat() {
         throw new Error("Authentication error. Please log in again.");
       }
       
+      console.log('Sending message to backend:', { message, category: selectedCategory });
       const botResponseText = await sendMessageToBackend(
         message,
         image,
@@ -248,9 +293,11 @@ function FashionAIChat() {
         email
       );
       
+      console.log('Received response from backend:', botResponseText);
+      
       // Extract image URLs from the bot's response text
-      // Extract image URLs from the response text
       const extractedImageUrls = extractImageUrls(botResponseText);
+      console.log('Extracted image URLs:', extractedImageUrls);
 
       // First, remove any line that contains "**Image URL:**"
       let cleanText = removeImageUrlLine(botResponseText);
@@ -258,12 +305,13 @@ function FashionAIChat() {
       // Then, remove any leftover image URLs (if any still exist in the text)
       cleanText = cleanText
         .replace(
-          /https?:\/\/[^\s]+(?:\.(?:png|jpe?g|gif|webp))(\?ts=[^\s]*)?/gi,
+          /https?:\/\/[^\s]+(?:\.(?:png|jpe?g|gif|webp))(\?[^\s]*)?/gi,
           ""
         )
         .replace(/\s+/g, " ")
         .trim();
-      console.log("After cleanup:", cleanText);
+      
+      console.log('Cleaned text:', cleanText);
 
       // Add bot's response
       setMessages((prev) => [
@@ -277,16 +325,14 @@ function FashionAIChat() {
         },
       ]);
     } catch (error) {
-      console.error("Error communicating with backend:", error);
+      console.error("Error in handleMessage:", error);
       
-      // Handle different error scenarios with user-friendly messages
       let errorMessage = "Error: Unable to reach the server.";
       
       if (error instanceof Error) {
         if (error.message.includes("session has expired") || 
             error.message.includes("log in again")) {
           errorMessage = error.message;
-          // Redirect to login page after a short delay
           setTimeout(() => {
             navigate("/login", { state: { from: location.pathname } });
           }, 3000);
@@ -301,7 +347,8 @@ function FashionAIChat() {
           text: errorMessage,
           sender: "bot",
           imageBase64: undefined,
-          category: undefined, // Error message doesn't need a category
+          category: undefined,
+          imageUrls: [],
         },
       ]);
     }
@@ -502,6 +549,19 @@ function FashionAIChat() {
     }
   };
 
+  // Add function to handle image load status
+  const handleImageLoadStatus = (url: string, hasError: boolean) => {
+    console.log(`Image load status for ${url}:`, !hasError);
+    setImageLoadStatus(prev => {
+      const newStatus = {
+        ...prev,
+        [url]: !hasError
+      };
+      console.log('Updated image load status:', newStatus);
+      return newStatus;
+    });
+  };
+
   return (
     <div className="fashion-chat-container">
       <Header />
@@ -575,23 +635,59 @@ function FashionAIChat() {
                 {/* Bot-sent image URLs with Try On button */}
                 {msg.sender === "bot" && msg.imageUrls && msg.imageUrls.length > 0 && (
                   <div className="fashion-chat-product-grid">
-                    {msg.imageUrls.map((url, i) => (
-                      <div key={i} className="fashion-chat-product-container">
-                        <img
-                          src={url}
-                          alt={`Bot suggestion ${i + 1}`}
-                          className="fashion-chat-image"
-                          loading="lazy"
-                        />
-                        <Button 
-                          onClick={() => handleTryOn(url, `Product ${i + 1}`)}
-                          className="fashion-chat-try-on-button"
-                        >
-                          <Shirt size={16} />
-                          Try On
-                        </Button>
-                      </div>
-                    ))}
+                    {msg.imageUrls.map((url, i) => {
+                      console.log(`Rendering image ${i + 1} with URL:`, url);
+                      console.log('Current load status:', imageLoadStatus[url]);
+                      return (
+                        <div key={i} className="fashion-chat-product-container">
+                          <img
+                            ref={(el) => {
+                              if (el) {
+                                imageRefs.current[url] = el;
+                              }
+                            }}
+                            src={url}
+                            alt={`Bot suggestion ${i + 1}`}
+                            className="fashion-chat-image"
+                            loading="lazy"
+                            onError={(e) => {
+                              console.log(`Image load error for ${url}`);
+                              const placeholderUrl = "https://placehold.co/400x600?text=Product+Image+Not+Available";
+                              // Replace with a fallback image when the original fails to load
+                              e.currentTarget.src = placeholderUrl;
+                              // Log the error for debugging
+                              console.error(`Failed to load image from URL: ${url}`);
+                              // Add a class to indicate the image failed to load
+                              e.currentTarget.classList.add('image-load-error');
+                              // Update load status for both original and placeholder URLs
+                              handleImageLoadStatus(url, true);
+                              handleImageLoadStatus(placeholderUrl, true);
+                            }}
+                            onLoad={(e) => {
+                              console.log(`Image loaded successfully for ${url}`);
+                              // Remove error class if the image loads successfully
+                              e.currentTarget.classList.remove('image-load-error');
+                              // Only update load status if it's not a placeholder image
+                              if (!url.includes('placehold.co')) {
+                                handleImageLoadStatus(url, false);
+                              }
+                            }}
+                          />
+                          {/* Only show Try On button if image loaded successfully and is not a placeholder */}
+                          {imageLoadStatus[url] && 
+                           !url.includes('placehold.co') && 
+                           !imageRefs.current[url]?.src.includes('placehold.co') && (
+                            <Button 
+                              onClick={() => handleTryOn(url, `Product ${i + 1}`)}
+                              className="fashion-chat-try-on-button"
+                            >
+                              <Shirt size={16} />
+                              Try On
+                            </Button>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>

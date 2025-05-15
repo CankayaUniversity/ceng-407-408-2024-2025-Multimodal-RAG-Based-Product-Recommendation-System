@@ -9,7 +9,7 @@ function Hero(): React.ReactElement {
     <section className="hero-section">
       <div className="hero-image-container">
         <img
-          src="/hero-image.jpg"
+          src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2070&auto=format&fit=crop"
           alt="Fashion style showcase"
           className="hero-image"
         />
