@@ -10,6 +10,7 @@ from pydantic import BaseModel
 
 from src.AI.multimodal_integration import integration
 from .auth import verify_token, get_user_id
+from src.web.backend.models.style_profile import StyleProfile
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -17,7 +18,6 @@ logger = logging.getLogger(__name__)
 class SearchQuery(BaseModel):
     query: str
     user_id: Optional[str] = None
-    include_wardrobe_items: Optional[bool] = False
     include_style_profile: Optional[bool] = False
     search_type: Optional[str] = "item"  # "item" or "outfit"
     filters: Optional[Dict[str, Any]] = None
@@ -25,7 +25,6 @@ class SearchQuery(BaseModel):
 class SearchImageQuery(BaseModel):
     caption: Optional[str] = ""
     user_id: Optional[str] = None
-    include_wardrobe_items: Optional[bool] = False
     include_style_profile: Optional[bool] = False
     search_type: Optional[str] = "item"  # "item" or "outfit"
     filters: Optional[Dict[str, Any]] = None
@@ -53,23 +52,16 @@ async def search(
         if search_request.user_id:
             user_id = search_request.user_id
         
-        # Get user's wardrobe items if requested
-        wardrobe_items = None
-        if user_id and search_request.include_wardrobe_items:
-            from src.web.backend.models.user_profile import get_user_wardrobe
-            wardrobe_items = await get_user_wardrobe(user_id)
-        
         # Get user's style profile if requested
         style_profile = None
         if user_id and search_request.include_style_profile:
-            from src.web.backend.models.user_profile import get_user_style_profile
-            style_profile = await get_user_style_profile(user_id)
+            style_profile = await StyleProfile.get_by_user_id(user_id)
         
         # Process the query using our integrated multimodal system
         results = await integration.process_query(
             query=search_request.query,
             user_id=user_id,
-            wardrobe_items=wardrobe_items,
+            wardrobe_items=None,  # Wardrobe feature disabled
             style_profile=style_profile,
             search_type=search_request.search_type,
             filters=search_request.filters
@@ -88,7 +80,6 @@ async def search(
 async def image_search(
     image: UploadFile = File(...),
     caption: str = Form(""),
-    include_wardrobe_items: bool = Form(False),
     include_style_profile: bool = Form(False),
     search_type: str = Form("item"),
     filters: Optional[str] = Form(None),
@@ -125,24 +116,17 @@ async def image_search(
             except:
                 logger.warning("Failed to parse filters JSON, ignoring filters")
         
-        # Get user's wardrobe items if requested
-        wardrobe_items = None
-        if user_id and include_wardrobe_items:
-            from src.web.backend.models.user_profile import get_user_wardrobe
-            wardrobe_items = await get_user_wardrobe(user_id)
-        
         # Get user's style profile if requested
         style_profile = None
         if user_id and include_style_profile:
-            from src.web.backend.models.user_profile import get_user_style_profile
-            style_profile = await get_user_style_profile(user_id)
+            style_profile = await StyleProfile.get_by_user_id(user_id)
         
         # Process the query using our integrated multimodal system
         results = await integration.process_query(
             query=caption,
             image_path=image_path,
             user_id=user_id,
-            wardrobe_items=wardrobe_items,
+            wardrobe_items=None,  # Wardrobe feature disabled
             style_profile=style_profile,
             search_type=search_type,
             filters=parsed_filters
@@ -162,83 +146,6 @@ async def image_search(
     except Exception as e:
         logger.error(f"Error processing image search: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Image search failed: {str(e)}")
-
-@router.post("/style-analysis")
-async def style_analysis(
-    image: UploadFile = File(...),
-    user_id: Optional[str] = Form(None),
-    style_preferences: Optional[str] = Form(None),
-    authorization: Optional[str] = Header(None)
-):
-    """
-    Analyze a style image to identify elements and provide recommendations
-    """
-    try:
-        # Save the uploaded image to a temporary file
-        temp_dir = tempfile.gettempdir()
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        image_filename = f"style_analysis_{timestamp}_{image.filename}"
-        image_path = os.path.join(temp_dir, image_filename)
-        
-        with open(image_path, "wb") as f:
-            f.write(await image.read())
-        
-        # Verify user token if provided
-        token_user_id = None
-        if authorization:
-            token = authorization.replace("Bearer ", "")
-            try:
-                user_data = await verify_token(token)
-                token_user_id = user_data.get("user_id")
-            except Exception as e:
-                logger.warning(f"Token verification failed: {str(e)}")
-        
-        # Use token user_id if no user_id provided in request
-        if not user_id and token_user_id:
-            user_id = token_user_id
-        
-        # Parse style preferences if provided
-        parsed_preferences = None
-        if style_preferences:
-            try:
-                parsed_preferences = json.loads(style_preferences)
-            except:
-                logger.warning("Failed to parse style preferences JSON, ignoring")
-        
-        # Get user's style profile if available
-        style_profile = None
-        if user_id:
-            from src.web.backend.models.user_profile import get_user_style_profile
-            style_profile = await get_user_style_profile(user_id)
-            
-            # Merge with provided preferences
-            if parsed_preferences and style_profile:
-                style_profile.update(parsed_preferences)
-            elif parsed_preferences:
-                style_profile = parsed_preferences
-        
-        # Use the Gemini service to analyze the style
-        from src.AI.gemini_service import GeminiService
-        gemini = GeminiService()
-        analysis_results = await gemini.analyze_style_image(
-            image_path=image_path,
-            user_preferences=style_profile
-        )
-        
-        # Clean up temporary file
-        try:
-            os.remove(image_path)
-        except:
-            pass
-        
-        # Log the analysis for analytics
-        logger.info(f"Style analysis for user: {user_id}")
-        
-        return analysis_results
-    
-    except Exception as e:
-        logger.error(f"Error processing style analysis: {str(e)}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Style analysis failed: {str(e)}")
 
 @router.get("/trending")
 async def get_trending_items(
@@ -298,7 +205,7 @@ async def get_trending_items(
 @router.get("/recommendations")
 async def get_personalized_recommendations(
     limit: int = Query(10),
-    context: Optional[str] = Query(None),  # can be "home", "style", "wardrobe"
+    context: Optional[str] = Query(None),  # can be "home", "style"
     authorization: Optional[str] = Header(None)
 ):
     """
@@ -319,12 +226,7 @@ async def get_personalized_recommendations(
             raise HTTPException(status_code=401, detail=f"Authentication failed: {str(e)}")
         
         # Get user's style profile
-        from src.web.backend.models.user_profile import get_user_style_profile
-        style_profile = await get_user_style_profile(user_id)
-        
-        # Get user's wardrobe items
-        from src.web.backend.models.user_profile import get_user_wardrobe
-        wardrobe_items = await get_user_wardrobe(user_id)
+        style_profile = await StyleProfile.get_by_user_id(user_id)
         
         # Use the Gemini service to generate recommendations
         from src.AI.gemini_service import GeminiService
@@ -333,7 +235,7 @@ async def get_personalized_recommendations(
         recommendations = await gemini.generate_recommendations(
             user_id=user_id,
             user_preferences=style_profile,
-            wardrobe_items=wardrobe_items,
+            wardrobe_items=None,  # Wardrobe feature disabled
             context=context,
             limit=limit
         )

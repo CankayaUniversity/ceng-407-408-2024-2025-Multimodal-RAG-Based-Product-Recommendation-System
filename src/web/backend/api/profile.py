@@ -4,7 +4,7 @@ import jwt
 import os
 import base64
 from models.user_photo import UserPhoto
-from models.user_profile import StyleProfile
+from models.style_profile import StyleProfile
 
 # Create a dedicated profile blueprint
 profile_bp = Blueprint('profile', __name__)
