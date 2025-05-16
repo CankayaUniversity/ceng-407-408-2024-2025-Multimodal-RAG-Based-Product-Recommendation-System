@@ -6,7 +6,7 @@ import google.generativeai as genai
 
 
 class ImageToTextGenerator:
-    def __init__(self, model="gemini-1.5-pro"):
+    def __init__(self, model="gemini-2.0-flash"):
         self.model = genai.GenerativeModel(model)
 
     def encode_image(self, image_base64):
