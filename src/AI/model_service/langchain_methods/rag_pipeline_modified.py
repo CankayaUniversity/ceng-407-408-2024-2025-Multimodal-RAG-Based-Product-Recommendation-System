@@ -34,7 +34,8 @@ def rag_pipeline(query_text, category, image_base64=None, memory=None):
         "clip_men_BLAZERS", "clip_men_HOODIES_SWEATSHIRTS", "clip_men_LINEN", "clip_men_OVERSHIRTS", 
         "clip_men_POLO SHIRTS", "clip_men_SHIRTS", "clip_men_SHOES", "clip_men_SHORTS", 
         "clip_men_SWEATERS_CARDIGANS", "clip_men_T-SHIRTS", "clip_men_TROUSERS", "clip_SHIRTS", 
-        "clip_SHOES", "clip_WAISTCOATS_GILETS"
+        "clip_SHOES", "clip_WAISTCOATS_GILETS", "beymen_women_sweatshirts",
+        "beymen_women_skirts", "beymen_women_jackets", "beymen_women_dresses"
     ]
     if category not in valid_categories:
         raise ValueError("Invalid category selected!")

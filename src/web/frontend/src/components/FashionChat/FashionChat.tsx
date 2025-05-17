@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { Message } from "../../types/message";
 import { sendMessageToBackend } from "../../api/ChatService";
 import TextareaAutosize from "react-textarea-autosize";
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown from "react-markdown";
 
 const valid_categories = [
   "clip_BASICS",
@@ -32,6 +32,10 @@ const valid_categories = [
   "clip_SHOES",
   "clip_WAISTCOATS_GILETS",
   "No Category",
+  "beymen_women_sweatshirts",
+  "beymen_women_skirts",
+  "beymen_women_jackets",
+  "beymen_women_dresses",
 ];
 
 // Add this interface for try-on state
@@ -54,7 +58,7 @@ function FashionAIChat() {
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] =
     useState<string>("No Category");
-  
+
   // Updated Try-On state with resultImage, isLoading, and error fields
   const [tryOnModal, setTryOnModal] = useState<TryOnState>({
     isOpen: false,
@@ -63,7 +67,7 @@ function FashionAIChat() {
     userPhoto: null,
     resultImage: null,
     isLoading: false,
-    error: null
+    error: null,
   });
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -95,17 +99,18 @@ function FashionAIChat() {
           navigate("/login", { state: { from: location.pathname } });
         } else {
           // Add welcome message when the chat loads
-          const username = localStorage.getItem("email")?.split("@")[0] || "there";
+          const username =
+            localStorage.getItem("email")?.split("@")[0] || "there";
           setMessages([
             {
               text: `Hello ${username}! I'm your fashion assistant. How can I help with your style needs today? You can ask for outfit suggestions, search for specific products, or upload a photo to find similar items.`,
               sender: "bot",
               imageBase64: undefined,
               category: undefined,
-              imageUrls: []
-            }
+              imageUrls: [],
+            },
           ]);
-          
+
           // Set up periodic token check (every 5 minutes)
           const tokenCheckInterval = setInterval(() => {
             const currentToken = localStorage.getItem("token");
@@ -115,33 +120,37 @@ function FashionAIChat() {
                 headers: {
                   Authorization: `Bearer ${currentToken}`,
                 },
-              }).then(response => {
-                if (!response.ok) {
-                  console.warn("Token expired during session");
-                  clearInterval(tokenCheckInterval);
-                  localStorage.removeItem("token");
-                  setMessages(prev => [
-                    ...prev,
-                    {
-                      text: "Your session has expired. Please log in again to continue.",
-                      sender: "bot",
-                      imageBase64: undefined,
-                      category: undefined,
-                    }
-                  ]);
-                  // Give user a moment to read the message before redirecting
-                  setTimeout(() => {
-                    navigate("/login", { state: { from: location.pathname } });
-                  }, 3000);
-                }
-              }).catch(err => {
-                console.error("Token check error:", err);
-              });
+              })
+                .then((response) => {
+                  if (!response.ok) {
+                    console.warn("Token expired during session");
+                    clearInterval(tokenCheckInterval);
+                    localStorage.removeItem("token");
+                    setMessages((prev) => [
+                      ...prev,
+                      {
+                        text: "Your session has expired. Please log in again to continue.",
+                        sender: "bot",
+                        imageBase64: undefined,
+                        category: undefined,
+                      },
+                    ]);
+                    // Give user a moment to read the message before redirecting
+                    setTimeout(() => {
+                      navigate("/login", {
+                        state: { from: location.pathname },
+                      });
+                    }, 3000);
+                  }
+                })
+                .catch((err) => {
+                  console.error("Token check error:", err);
+                });
             } else {
               clearInterval(tokenCheckInterval);
             }
           }, 5 * 60 * 1000); // Check every 5 minutes
-          
+
           // Clear interval on component unmount
           return () => clearInterval(tokenCheckInterval);
         }
@@ -152,7 +161,7 @@ function FashionAIChat() {
     };
 
     checkToken();
-    
+
     // Focus the input field on load
     setTimeout(() => {
       inputRef.current?.focus();
@@ -218,18 +227,21 @@ function FashionAIChat() {
       if (!token) {
         throw new Error("You must be logged in to use the chat service");
       }
-      
+
       const email = localStorage.getItem("email");
-      
+
       // First check if the token is still valid
       try {
-        const tokenCheckResponse = await fetch("http://localhost:3001/auth/check", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        
+        const tokenCheckResponse = await fetch(
+          "http://localhost:3001/auth/check",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
         if (!tokenCheckResponse.ok) {
           // Token is invalid, remove it and notify user
           localStorage.removeItem("token");
@@ -239,7 +251,7 @@ function FashionAIChat() {
         console.error("Token validation error:", tokenError);
         throw new Error("Authentication error. Please log in again.");
       }
-      
+
       const botResponseText = await sendMessageToBackend(
         message,
         image,
@@ -247,7 +259,7 @@ function FashionAIChat() {
         selectedCategory,
         email
       );
-      
+
       // Extract image URLs from the bot's response text
       // Extract image URLs from the response text
       const extractedImageUrls = extractImageUrls(botResponseText);
@@ -278,13 +290,15 @@ function FashionAIChat() {
       ]);
     } catch (error) {
       console.error("Error communicating with backend:", error);
-      
+
       // Handle different error scenarios with user-friendly messages
       let errorMessage = "Error: Unable to reach the server.";
-      
+
       if (error instanceof Error) {
-        if (error.message.includes("session has expired") || 
-            error.message.includes("log in again")) {
+        if (
+          error.message.includes("session has expired") ||
+          error.message.includes("log in again")
+        ) {
           errorMessage = error.message;
           // Redirect to login page after a short delay
           setTimeout(() => {
@@ -294,7 +308,7 @@ function FashionAIChat() {
           errorMessage = `Error: ${error.message}`;
         }
       }
-      
+
       setMessages((prev) => [
         ...prev,
         {
@@ -332,8 +346,8 @@ function FashionAIChat() {
         sender: "bot",
         imageBase64: undefined,
         category: undefined,
-        imageUrls: []
-      }
+        imageUrls: [],
+      },
     ]);
   };
 
@@ -341,7 +355,7 @@ function FashionAIChat() {
   const handleTryOn = (imageUrl: string, productName: string) => {
     // Ensure URL is properly encoded, especially for Zara URLs with multiple slashes
     let processedUrl = imageUrl;
-    
+
     // Reset the modal state completely
     setTryOnModal({
       isOpen: true,
@@ -350,12 +364,12 @@ function FashionAIChat() {
       userPhoto: null,
       resultImage: null,
       isLoading: false,
-      error: null
+      error: null,
     });
-    
+
     // Reset the file input
     if (tryOnFileInputRef.current) {
-      tryOnFileInputRef.current.value = '';
+      tryOnFileInputRef.current.value = "";
     }
   };
 
@@ -365,12 +379,12 @@ function FashionAIChat() {
       ...tryOnModal,
       userPhoto: null,
       resultImage: null,
-      error: null
+      error: null,
     });
-    
+
     // Reset the file input element so the same file can be selected again
     if (tryOnFileInputRef.current) {
-      tryOnFileInputRef.current.value = '';
+      tryOnFileInputRef.current.value = "";
     }
   };
 
@@ -383,17 +397,19 @@ function FashionAIChat() {
       userPhoto: null,
       resultImage: null,
       isLoading: false,
-      error: null
+      error: null,
     });
-    
+
     // Reset the file input element when closing the modal
     if (tryOnFileInputRef.current) {
-      tryOnFileInputRef.current.value = '';
+      tryOnFileInputRef.current.value = "";
     }
   };
 
   // Handle user photo upload for try-on
-  const handleTryOnPhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTryOnPhotoUpload = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const selectedFile = event.target.files?.[0];
     if (selectedFile) {
       const reader = new FileReader();
@@ -402,7 +418,7 @@ function FashionAIChat() {
           ...tryOnModal,
           userPhoto: reader.result as string,
           resultImage: null, // Clear previous result
-          error: null // Clear any previous errors
+          error: null, // Clear any previous errors
         });
       };
       reader.readAsDataURL(selectedFile);
@@ -413,7 +429,7 @@ function FashionAIChat() {
   const triggerTryOnPhotoUpload = () => {
     // Reset the file input value first, so the same file can be selected again
     if (tryOnFileInputRef.current) {
-      tryOnFileInputRef.current.value = '';
+      tryOnFileInputRef.current.value = "";
     }
     tryOnFileInputRef.current?.click();
   };
@@ -423,80 +439,94 @@ function FashionAIChat() {
     if (!tryOnModal.userPhoto || !tryOnModal.imageUrl) {
       setTryOnModal({
         ...tryOnModal,
-        error: "Both your photo and a clothing item are required"
+        error: "Both your photo and a clothing item are required",
       });
       return;
     }
-    
+
     setTryOnModal({
       ...tryOnModal,
       isLoading: true,
-      error: null
+      error: null,
     });
-    
+
     try {
       console.log("Starting try-on process");
-      
+
       // Create a FormData object to send the image URLs
       const formData = new FormData();
-      formData.append('avatar_image_url', tryOnModal.userPhoto);
-      formData.append('clothing_image_url', tryOnModal.imageUrl);
-      
+      formData.append("avatar_image_url", tryOnModal.userPhoto);
+      formData.append("clothing_image_url", tryOnModal.imageUrl);
+
       console.log("Sending request to try-on API");
-      
+
       // Send request to our backend API with a timeout
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
-      
-      const response = await fetch('http://localhost:3001/api/tryon', {
-        method: 'POST',
+
+      const response = await fetch("http://localhost:3001/api/tryon", {
+        method: "POST",
         body: formData,
-        signal: controller.signal
+        signal: controller.signal,
       });
-      
+
       clearTimeout(timeoutId);
-      
+
       if (!response.ok) {
-        console.error("Try-on API error:", response.status, response.statusText);
+        console.error(
+          "Try-on API error:",
+          response.status,
+          response.statusText
+        );
         const errorData = await response.json();
-        throw new Error(errorData.error || `Failed to process try-on request (Status: ${response.status})`);
+        throw new Error(
+          errorData.error ||
+            `Failed to process try-on request (Status: ${response.status})`
+        );
       }
-      
+
       const result = await response.json();
-      
+
       console.log("Try-on response received:", result);
-      
+
       if (result.error) {
         throw new Error(result.error);
       }
-      
+
       if (!result.image) {
         throw new Error("No image was returned from the server");
       }
-      
+
       // Update state with the result image
       setTryOnModal({
         ...tryOnModal,
-        resultImage: `data:${result.content_type || 'image/png'};base64,${result.image}`,
-        isLoading: false
+        resultImage: `data:${result.content_type || "image/png"};base64,${
+          result.image
+        }`,
+        isLoading: false,
       });
-      
     } catch (error) {
-      console.error('Try-on processing error:', error);
+      console.error("Try-on processing error:", error);
       setTryOnModal({
         ...tryOnModal,
-        error: error instanceof Error ? error.message : 'An unknown error occurred during processing',
-        isLoading: false
+        error:
+          error instanceof Error
+            ? error.message
+            : "An unknown error occurred during processing",
+        isLoading: false,
       });
-      
+
       // Add a retry option if it was a timeout or network error
       if (
-        error instanceof DOMException || 
-        (error && typeof error === 'object' && 'name' in error && error.name === 'AbortError')
+        error instanceof DOMException ||
+        (error &&
+          typeof error === "object" &&
+          "name" in error &&
+          error.name === "AbortError")
       ) {
-        setTryOnModal(prev => ({
-          ...prev, 
-          error: 'Request timed out. The server may be busy. Please try again.'
+        setTryOnModal((prev) => ({
+          ...prev,
+          error: "Request timed out. The server may be busy. Please try again.",
         }));
       }
     }
@@ -522,7 +552,7 @@ function FashionAIChat() {
               <p>Send a message to start your fashion conversation</p>
             </div>
           )}
-        
+
           {messages.map((msg, index) => (
             <div key={index} className={`fashion-chat-message ${msg.sender}`}>
               {msg.sender === "bot" && (
@@ -539,23 +569,30 @@ function FashionAIChat() {
                       components={{
                         strong: ({ node, ...props }) => {
                           // Special handling for Reasoning: and Product: labels
-                          const content = props.children?.toString() || '';
-                          if (content.startsWith('Reasoning:') || content.startsWith('Product:')) {
-                            return <strong className="section-header" {...props} />;
+                          const content = props.children?.toString() || "";
+                          if (
+                            content.startsWith("Reasoning:") ||
+                            content.startsWith("Product:")
+                          ) {
+                            return (
+                              <strong className="section-header" {...props} />
+                            );
                           }
                           return <strong {...props} />;
                         },
                         p: ({ node, ...props }) => {
                           // Apply special styling to paragraphs containing section headers
-                          const content = props.children?.toString() || '';
+                          const content = props.children?.toString() || "";
                           if (
-                            content.includes('Reasoning:') || 
-                            content.includes('Product:')
+                            content.includes("Reasoning:") ||
+                            content.includes("Product:")
                           ) {
-                            return <p className="section-paragraph" {...props} />;
+                            return (
+                              <p className="section-paragraph" {...props} />
+                            );
                           }
                           return <p {...props} />;
-                        }
+                        },
                       }}
                     />
                   </div>
@@ -573,27 +610,29 @@ function FashionAIChat() {
                 )}
 
                 {/* Bot-sent image URLs with Try On button */}
-                {msg.sender === "bot" && msg.imageUrls && msg.imageUrls.length > 0 && (
-                  <div className="fashion-chat-product-grid">
-                    {msg.imageUrls.map((url, i) => (
-                      <div key={i} className="fashion-chat-product-container">
-                        <img
-                          src={url}
-                          alt={`Bot suggestion ${i + 1}`}
-                          className="fashion-chat-image"
-                          loading="lazy"
-                        />
-                        <Button 
-                          onClick={() => handleTryOn(url, `Product ${i + 1}`)}
-                          className="fashion-chat-try-on-button"
-                        >
-                          <Shirt size={16} />
-                          Try On
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                {msg.sender === "bot" &&
+                  msg.imageUrls &&
+                  msg.imageUrls.length > 0 && (
+                    <div className="fashion-chat-product-grid">
+                      {msg.imageUrls.map((url, i) => (
+                        <div key={i} className="fashion-chat-product-container">
+                          <img
+                            src={url}
+                            alt={`Bot suggestion ${i + 1}`}
+                            className="fashion-chat-image"
+                            loading="lazy"
+                          />
+                          <Button
+                            onClick={() => handleTryOn(url, `Product ${i + 1}`)}
+                            className="fashion-chat-try-on-button"
+                          >
+                            <Shirt size={16} />
+                            Try On
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
               </div>
               {msg.sender === "user" && (
                 <div className="fashion-chat-avatar user">
@@ -612,7 +651,7 @@ function FashionAIChat() {
             <div className="fashion-try-on-modal">
               <div className="fashion-try-on-modal-header">
                 <h2>Virtual Try On</h2>
-                <button 
+                <button
                   className="fashion-try-on-close-button"
                   onClick={closeTryOnModal}
                 >
@@ -621,22 +660,22 @@ function FashionAIChat() {
               </div>
               <div className="fashion-try-on-modal-content">
                 <div className="fashion-try-on-product">
-                  <img 
-                    src={tryOnModal.imageUrl || ''} 
-                    alt={tryOnModal.productName || 'Product'} 
+                  <img
+                    src={tryOnModal.imageUrl || ""}
+                    alt={tryOnModal.productName || "Product"}
                   />
                   <p>{tryOnModal.productName}</p>
                 </div>
                 <div className="fashion-try-on-preview">
                   {tryOnModal.resultImage ? (
                     <div className="fashion-try-on-result">
-                      <img 
+                      <img
                         src={tryOnModal.resultImage}
-                        alt="Try-on result" 
+                        alt="Try-on result"
                         className="fashion-try-on-result-image"
                       />
                       <div className="fashion-try-on-controls">
-                        <Button 
+                        <Button
                           className="fashion-try-on-control-button"
                           onClick={resetTryOn}
                         >
@@ -649,31 +688,38 @@ function FashionAIChat() {
                     <>
                       <div className="fashion-try-on-avatar">
                         {tryOnModal.userPhoto ? (
-                          <img 
-                            src={tryOnModal.userPhoto} 
-                            alt="User Avatar" 
-                            className="fashion-try-on-avatar-image" 
+                          <img
+                            src={tryOnModal.userPhoto}
+                            alt="User Avatar"
+                            className="fashion-try-on-avatar-image"
                           />
                         ) : (
                           <div className="fashion-try-on-upload-prompt">
                             <div className="fashion-try-on-upload-icon">
                               <Paperclip size={24} />
                             </div>
-                            <p>Upload your photo to see how this would look on you</p>
+                            <p>
+                              Upload your photo to see how this would look on
+                              you
+                            </p>
                           </div>
                         )}
                       </div>
                       <div className="fashion-try-on-controls">
-                        <Button 
+                        <Button
                           className="fashion-try-on-control-button"
                           onClick={triggerTryOnPhotoUpload}
                         >
-                          {tryOnModal.userPhoto ? 'Choose Different Photo' : 'Upload Your Photo'}
+                          {tryOnModal.userPhoto
+                            ? "Choose Different Photo"
+                            : "Upload Your Photo"}
                         </Button>
-                        <Button 
+                        <Button
                           className="fashion-try-on-control-button try-on-process-button"
                           onClick={processTryOn}
-                          disabled={!tryOnModal.userPhoto || tryOnModal.isLoading}
+                          disabled={
+                            !tryOnModal.userPhoto || tryOnModal.isLoading
+                          }
                         >
                           {tryOnModal.isLoading ? (
                             <>
@@ -690,7 +736,7 @@ function FashionAIChat() {
                       </div>
                     </>
                   )}
-                  
+
                   {/* Error message */}
                   {tryOnModal.error && (
                     <div className="fashion-try-on-error">
@@ -710,7 +756,8 @@ function FashionAIChat() {
             <select
               className="fashion-chat-category-select"
               value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}>
+              onChange={(e) => setSelectedCategory(e.target.value)}
+            >
               <option value="">Select Category</option>
               {valid_categories.map((category) => (
                 <option key={category} value={category}>
@@ -744,14 +791,16 @@ function FashionAIChat() {
             <div className="fashion-chat-input-actions">
               <Button
                 onClick={handleAttachmentClick}
-                className="fashion-chat-attachment-button">
+                className="fashion-chat-attachment-button"
+              >
                 <Paperclip size={20} className="fashion-chat-attachment-icon" />
               </Button>
 
               <Button
                 onClick={handleMessage}
                 disabled={loading || (!message.trim() && !image)}
-                className="fashion-chat-send-button">
+                className="fashion-chat-send-button"
+              >
                 <Send size={20} className="fashion-chat-send-icon" />
               </Button>
             </div>
