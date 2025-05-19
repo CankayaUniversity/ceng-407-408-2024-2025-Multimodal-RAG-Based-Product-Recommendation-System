@@ -27,26 +27,13 @@ class TextToImageSearch:
     def search(self, query_text: str, n_results: int = 5):
         """Perform text-to-image similarity search."""
         text_emb = self.fclip.encode_text([query_text], batch_size=1).ravel()
-        
-        # Use named vector format for beymen collections, regular format for others
-        if self.collection_name.startswith("beymen_"):
-            results = self.client.search(
-                collection_name=self.collection_name,
-                query_vector={
-                    "name": "multimodal",
-                    "vector": text_emb.tolist()
-                },
-                limit=n_results,
-                with_payload=True
-            )
-        else:
-            # For other collections with default vector name
-            results = self.client.search(
-                collection_name=self.collection_name,
-                query_vector=text_emb.tolist(),
-                limit=n_results,
-                with_payload=True
-            )
+
+        results = self.client.search(
+            collection_name=self.collection_name,
+            query_vector=text_emb.tolist(),
+            limit=n_results,
+            with_payload=True
+        )
 
         return results
 
