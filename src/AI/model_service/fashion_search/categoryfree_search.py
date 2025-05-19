@@ -317,13 +317,27 @@ class CategoryFreeSearch:
                     query_vector = self._boost_embedding_for_outfit(query_vector, outfit_types[0])
                     print(f"Applied outfit boosting for {outfit_types[0]}")
                 
-                results = self.client.search(
-                    collection_name=collection_name,
-                    query_vector=query_vector,
-                    limit=limit,
-                    with_payload=True,
-                    search_params=models.SearchParams(hnsw_ef=128)
-                )
+                # Use named vector format for beymen collections, regular format for others
+                if collection_name.startswith("beymen_"):
+                    results = self.client.search(
+                        collection_name=collection_name,
+                        query_vector={
+                            "name": "multimodal",
+                            "vector": query_vector
+                        },
+                        limit=limit,
+                        with_payload=True,
+                        search_params=models.SearchParams(hnsw_ef=128)
+                    )
+                else:
+                    # For other collections with default vector name
+                    results = self.client.search(
+                        collection_name=collection_name,
+                        query_vector=query_vector,
+                        limit=limit,
+                        with_payload=True,
+                        search_params=models.SearchParams(hnsw_ef=128)
+                    )
                 
                 if results:
                     print(f"Found {len(results)} results in {collection_name}")

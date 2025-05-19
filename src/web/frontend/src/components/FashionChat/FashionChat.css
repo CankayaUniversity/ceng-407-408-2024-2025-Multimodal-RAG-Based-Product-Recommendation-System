@@ -408,6 +408,20 @@
   overflow: hidden;
   transition: var(--transition-normal);
   box-shadow: var(--shadow-sm);
+  height: 400px;
+  width: 100%;
+  border: 1px solid var(--border-color);
+}
+
+.fashion-chat-product-container::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 80px;
+  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
+  pointer-events: none;
 }
 
 .fashion-chat-product-container:hover {
@@ -416,16 +430,14 @@
 }
 
 .fashion-chat-image {
-  border-radius: var(--radius-md);
-  max-width: 100%;
-  height: auto;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   display: block;
+  border-radius: var(--radius-md);
 }
 
 .fashion-chat-try-on-button {
-  position: absolute;
-  bottom: 12px;
-  right: 12px;
   background-color: rgba(37, 99, 235, 0.9);
   color: white;
   border: none;
@@ -437,19 +449,63 @@
   gap: 8px;
   cursor: pointer;
   transition: var(--transition-normal);
-  opacity: 0;
+  opacity: 1;
   box-shadow: var(--shadow-md);
   z-index: 10;
 }
 
-.fashion-chat-product-container:hover .fashion-chat-try-on-button {
+.fashion-chat-buy-button {
+  background-color: rgba(16, 185, 129, 0.9);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 8px 14px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: var(--transition-normal);
   opacity: 1;
+  box-shadow: var(--shadow-md);
+  z-index: 10;
+}
+
+.fashion-chat-buy-button-disabled {
+  background-color: rgba(156, 163, 175, 0.6);
+  color: rgba(255, 255, 255, 0.8);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 8px 14px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: not-allowed;
+  transition: var(--transition-normal);
+  opacity: 1;
+  box-shadow: var(--shadow-sm);
+  z-index: 10;
+}
+
+.fashion-chat-product-container:hover .fashion-chat-try-on-button,
+.fashion-chat-product-container:hover .fashion-chat-buy-button,
+.fashion-chat-product-container:hover .fashion-chat-buy-button-disabled {
+  opacity: 1;
+}
+
+.fashion-chat-try-on-button:hover,
+.fashion-chat-buy-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.fashion-chat-buy-button:hover {
+  background-color: rgba(5, 150, 105, 0.95);
 }
 
 .fashion-chat-try-on-button:hover {
   background-color: var(--primary-hover);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
 }
 
 /* Modal styles */
@@ -708,9 +764,9 @@
 /* Product grid styling */
 .fashion-chat-product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 16px;
-  margin-top: 20px;
+  margin-top: 24px;
   width: 100%;
   border-top: 1px solid var(--border-color);
   padding-top: 16px;

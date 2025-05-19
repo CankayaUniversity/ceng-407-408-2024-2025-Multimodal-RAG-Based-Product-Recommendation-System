@@ -31,8 +31,10 @@ const valid_categories = [
   "clip_SHIRTS",
   "clip_SHOES",
   "clip_WAISTCOATS_GILETS",
-  "beymen_women_jackets",
   "beymen_women_dresses",
+  "beymen_women_jackets",
+  "beymen_women_skirts",
+  "beymen_women_sweatshirts",
   "No Category",
 ];
 
@@ -304,8 +306,28 @@ function FashionAIChat() {
       // Extract product links (not image URLs)
       const linkRegex = /(https?:\/\/(?!static\.|cdn\.|placehold\.co)[^\s]+(?:\/[^\s]*)?)/gi;
       const allLinks = [...botResponseText.matchAll(linkRegex)].map(match => match[0]);
-      // Filter out image links
-      const productLinks = allLinks.filter(link => !link.match(/\.(jpg|jpeg|png|webp|gif)$/i));
+      
+      // Extract links labeled with "Link:" pattern - these are most likely product links
+      const labeledLinkRegex = /Link:\s*(https?:\/\/[^\s,]+)/gi;
+      const labeledLinks = [...botResponseText.matchAll(labeledLinkRegex)].map(match => match[1]);
+      
+      // Extract links following 'Product:' that aren't image URLs - these are often product links
+      const productLinkRegex = /Product:.*?(https?:\/\/(?!.*\.(jpg|jpeg|png|gif|webp))[^\s,]+)/gi;
+      const productLinks = [...botResponseText.matchAll(productLinkRegex)].map(match => match[1]);
+      
+      // Combine all links, prioritizing labeled links first
+      const combinedLinks = [...labeledLinks, ...productLinks, ...allLinks];
+      
+      // Filter out image links and duplicates
+      const uniqueProductLinks = Array.from(new Set(
+        combinedLinks.filter(link => 
+          !link.match(/\.(jpg|jpeg|png|webp|gif)$/i) && 
+          !link.includes('static.zara.net') &&
+          !link.includes('placehold.co')
+        )
+      ));
+      
+      console.log('Extracted product links:', uniqueProductLinks);
 
       // First, remove any line that contains "**Image URL:**"
       let cleanText = removeImageUrlLine(botResponseText);
@@ -330,7 +352,7 @@ function FashionAIChat() {
           imageBase64: undefined,
           category: undefined,
           imageUrls: extractedImageUrls,
-          links: productLinks,
+          links: uniqueProductLinks,
         },
       ]);
     } catch (error) {
@@ -682,32 +704,47 @@ function FashionAIChat() {
                               }
                             }}
                           />
-                          {/* Only show Try On button if image loaded successfully and is not a placeholder */}
-                          {imageLoadStatus[url] && 
-                           !url.includes('placehold.co') && 
-                           !imageRefs.current[url]?.src.includes('placehold.co') && (
-                            <div style={{ display: 'flex', gap: '8px' }}>
-                              <Button 
-                                onClick={() => handleTryOn(url, `Product ${i + 1}`)}
-                                className="fashion-chat-try-on-button"
+                          {/* Always show buttons for product recommendations */}
+                          <div style={{ 
+                            display: 'flex', 
+                            justifyContent: 'space-between', 
+                            position: 'absolute',
+                            bottom: '12px',
+                            left: '12px',
+                            right: '12px',
+                            width: 'calc(100% - 24px)',
+                            zIndex: 10
+                          }}>
+                            {/* Buy button on the left */}
+                            {msg.links && msg.links[i] && !msg.links[i].includes('.jpg') && !msg.links[i].includes('.png') ? (
+                              <a 
+                                href={msg.links[i]} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                style={{ textDecoration: 'none' }}
                               >
-                                <Shirt size={16} />
-                                Try On
+                                <Button className="fashion-chat-buy-button">
+                                  Buy
+                                </Button>
+                              </a>
+                            ) : (
+                              <Button 
+                                className="fashion-chat-buy-button-disabled"
+                                disabled={true}
+                              >
+                                Buy
                               </Button>
-                              {msg.links && msg.links[i] && (
-                                <a 
-                                  href={msg.links[i]} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  style={{ textDecoration: 'none' }}
-                                >
-                                  <Button className="fashion-chat-try-on-button" style={{ backgroundColor: '#10b981' }}>
-                                    Buy
-                                  </Button>
-                                </a>
-                              )}
-                            </div>
-                          )}
+                            )}
+                            
+                            {/* Try On button on the right */}
+                            <Button 
+                              onClick={() => handleTryOn(url, `Product ${i + 1}`)}
+                              className="fashion-chat-try-on-button"
+                            >
+                              <Shirt size={16} />
+                              Try On
+                            </Button>
+                          </div>
                         </div>
                       );
                     })}

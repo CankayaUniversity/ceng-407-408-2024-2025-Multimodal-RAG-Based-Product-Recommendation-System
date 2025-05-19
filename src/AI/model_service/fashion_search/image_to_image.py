@@ -35,13 +35,27 @@ class ImageToImageSearch:
         img_emb = self.fclip.encode_images([image], batch_size=1)[0]
         img_emb_normalized = img_emb / np.linalg.norm(img_emb)
 
-        results = self.client.search(
-            collection_name=collection_name,
-            query_vector=img_emb_normalized.tolist(),
-            limit=n_results,
-            with_payload=True,
-            search_params=models.SearchParams(hnsw_ef=128)
-        )
+        # Use named vector format for beymen collections, regular format for others
+        if collection_name.startswith("beymen_"):
+            results = self.client.search(
+                collection_name=collection_name,
+                query_vector={
+                    "name": "multimodal",
+                    "vector": img_emb_normalized.tolist()
+                },
+                limit=n_results,
+                with_payload=True,
+                search_params=models.SearchParams(hnsw_ef=128)
+            )
+        else:
+            # For other collections with default vector name
+            results = self.client.search(
+                collection_name=collection_name,
+                query_vector=img_emb_normalized.tolist(),
+                limit=n_results,
+                with_payload=True,
+                search_params=models.SearchParams(hnsw_ef=128)
+            )
 
         sorted_results = sorted(results, key=lambda x: x.score)[:n_results]
 
