@@ -4,4 +4,5 @@ export interface Message {
   imageBase64?: string;
   category?: string;
   imageUrls?: string[]; // ← new
+  links?: string[];
 }

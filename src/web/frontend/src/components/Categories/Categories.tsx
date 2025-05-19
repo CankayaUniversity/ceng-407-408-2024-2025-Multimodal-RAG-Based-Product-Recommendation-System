@@ -17,7 +17,11 @@ function Categories(): React.ReactElement {
     { id: 5, title: "Women's Bags", image: "https://placehold.co/300x300" },
     { id: 6, title: "Men's Bags", image: "https://placehold.co/300x300" },
     { id: 7, title: "Women's Accessories", image: "https://placehold.co/300x300" },
-    { id: 8, title: "Men's Accessories", image: "https://placehold.co/300x300" }
+    { id: 8, title: "Men's Accessories", image: "https://placehold.co/300x300" },
+    { id: 9, title: "Dresses", image: "https://placehold.co/300x300" },
+    { id: 10, title: "Jackets", image: "https://placehold.co/300x300" },
+    { id: 11, title: "Skirts", image: "https://placehold.co/300x300" },
+    { id: 12, title: "Sweatshirts", image: "https://placehold.co/300x300" }
   ];
 
   return (

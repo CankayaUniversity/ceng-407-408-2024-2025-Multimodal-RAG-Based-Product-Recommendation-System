@@ -31,6 +31,8 @@ const valid_categories = [
   "clip_SHIRTS",
   "clip_SHOES",
   "clip_WAISTCOATS_GILETS",
+  "beymen_women_jackets",
+  "beymen_women_dresses",
   "No Category",
 ];
 
@@ -299,6 +301,12 @@ function FashionAIChat() {
       const extractedImageUrls = extractImageUrls(botResponseText);
       console.log('Extracted image URLs:', extractedImageUrls);
 
+      // Extract product links (not image URLs)
+      const linkRegex = /(https?:\/\/(?!static\.|cdn\.|placehold\.co)[^\s]+(?:\/[^\s]*)?)/gi;
+      const allLinks = [...botResponseText.matchAll(linkRegex)].map(match => match[0]);
+      // Filter out image links
+      const productLinks = allLinks.filter(link => !link.match(/\.(jpg|jpeg|png|webp|gif)$/i));
+
       // First, remove any line that contains "**Image URL:**"
       let cleanText = removeImageUrlLine(botResponseText);
 
@@ -322,6 +330,7 @@ function FashionAIChat() {
           imageBase64: undefined,
           category: undefined,
           imageUrls: extractedImageUrls,
+          links: productLinks,
         },
       ]);
     } catch (error) {
@@ -677,13 +686,27 @@ function FashionAIChat() {
                           {imageLoadStatus[url] && 
                            !url.includes('placehold.co') && 
                            !imageRefs.current[url]?.src.includes('placehold.co') && (
-                            <Button 
-                              onClick={() => handleTryOn(url, `Product ${i + 1}`)}
-                              className="fashion-chat-try-on-button"
-                            >
-                              <Shirt size={16} />
-                              Try On
-                            </Button>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                              <Button 
+                                onClick={() => handleTryOn(url, `Product ${i + 1}`)}
+                                className="fashion-chat-try-on-button"
+                              >
+                                <Shirt size={16} />
+                                Try On
+                              </Button>
+                              {msg.links && msg.links[i] && (
+                                <a 
+                                  href={msg.links[i]} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  style={{ textDecoration: 'none' }}
+                                >
+                                  <Button className="fashion-chat-try-on-button" style={{ backgroundColor: '#10b981' }}>
+                                    Buy
+                                  </Button>
+                                </a>
+                              )}
+                            </div>
                           )}
                         </div>
                       );
