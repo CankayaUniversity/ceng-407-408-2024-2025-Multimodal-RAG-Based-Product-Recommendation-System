@@ -30,7 +30,10 @@ class TextToImageSearch:
 
         results = self.client.search(
             collection_name=self.collection_name,
-            query_vector=text_emb.tolist(),
+            query_vector=(
+                "multimodal",
+                text_emb.tolist()
+            ),
             limit=n_results,
             with_payload=True
         )
