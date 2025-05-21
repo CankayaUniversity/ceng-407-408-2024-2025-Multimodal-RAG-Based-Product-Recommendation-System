@@ -30,7 +30,7 @@ function Hero(): React.ReactElement {
               </button>
               <button 
                 className="btn btn-secondary"
-                onClick={() => document.querySelector('.brands-section')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => document.querySelector('.section-container')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 Explore Trends
                 <ShoppingBag size={18} />
