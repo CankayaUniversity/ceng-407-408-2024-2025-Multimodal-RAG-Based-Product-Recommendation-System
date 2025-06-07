@@ -1,16 +1,53 @@
 # Multimodal RAG-Based Product Recommendation System
-This project focuses on developing a Multimodal Retrieval-Augmented Generation (RAG) system for personalized recommendations in the
-fashion and cosmetics domains. The system integrates advanced AI techniques, including LLMs (Large Language Models) and multimodal
-embeddings, to suggest eco-friendly and trending products based on user preferences. By combining textual descriptions, product images,
-sustainability certifications, and trend data, the system creates a comprehensive, user-driven recommendation platform.
+## Overview
+This project implements an advanced Multimodal Retrieval-Augmented Generation (RAG) system for personalized product recommendations in the fashion domain. The system combines state-of-the-art AI technologies with a user-friendly interface to provide intelligent, context-aware product suggestions through an interactive chatbot.
 
-<br>
+## Key Features
 
-Key components of the project include a Flask-based backend for API management, a React frontend for user interaction, and a vector
-database to store multimodal embeddings efficiently. Leveraging technologies like OpenAI API, Gemini, and embedding services such as
-Hugging Face, the system enables real-time recommendations with enhanced accuracy and relevance. This platform aims to bridge the gap in
-sustainable fashion and cosmetics by offering environmentally conscious, trend-aware, and user-personalized suggestions through a user-friendly
-web interface.
+
+### 1. Multimodal Recommendations
+- Text and visual similarity matching
+- Personalized recommendation engine
+- Real-time product suggestions
+- Trend-aware product ranking
+
+### 2. Virtual Try-On System
+- AI-powered virtual fitting room
+- Real-time clothing visualization
+- Multiple image format support
+- Seamless integration with product recommendations
+
+### 3. Real-Time Trend Analysis
+- Live trend monitoring and social media integration
+- Seasonal fashion trend tracking
+- Dynamic trend score calculation
+- Trend-based product recommendations
+
+### 4. Advanced Search
+- Natural language processing
+- Visual search functionality
+- Trend-aware recommendations
+- Real-time search updates
+  
+### 5. User Experience
+- Intuitive and responsive web interface
+- Real-time feedback and suggestions
+- Interactive product exploration
+- Seamless virtual try-on experience
+
+
+## Technical Stack
+
+### Backend
+- **Framework**: Flask (Python)
+- **APIs**: Gemini, RapidAPI, NewsAPI, Google API
+- **Database**: Qdrant vector database for embeddings
+- **AI/ML**: LLMs, Multimodal embeddings, Trend analysis models
+
+### Frontend
+- **Framework**: React.js
+- **Features**: Real-time updates, Trend visualization
+- **State Management**: React hooks and context
 
 <br>
 
